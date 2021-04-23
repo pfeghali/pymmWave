@@ -166,13 +166,13 @@ class IWR6843AOP(Sensor):
                 if a is None:
                     raise SerialException()
                 b = MAGIC_NUMBER
-                indx = [x for x in range(len(a)) if a[x:x+len(b)] == b]
+                index = [x for x in range(len(a)) if a[x:x+len(b)] == b]
                 # print(a)
-                if len(indx) > 0:
+                if len(index) > 0:
                     dt: frame = frame()
 
                     # Header
-                    byteVecIdx = indx[0]+8 # magic word (4 unit16)
+                    byteVecIdx = index[0]+8 # magic word (4 unit16)
                     #numDetectedObj = 0
                     # Version, uint32: MajorNum * 2^24 + MinorNum * 2^16 + BugfixNum * 2^8 + BuildNum
                     dt.tlv_version = a[byteVecIdx:byteVecIdx + 4]
@@ -220,49 +220,50 @@ class IWR6843AOP(Sensor):
                         for _ in range(numTLVs):
                             if(byteVecIdx>len(bv)):
                                 break
-                            tlvtype = np.sum(np.dot(bv[byteVecIdx:byteVecIdx + 4], BYTE_MULT))  # type: ignore
+                            tlv_type = np.sum(np.dot(bv[byteVecIdx:byteVecIdx + 4], BYTE_MULT))  # type: ignore
                             byteVecIdx += 4
-                            tlvlength = int(np.sum(np.dot(bv[byteVecIdx:byteVecIdx + 4], BYTE_MULT)))  # type: ignore
+                            tlv_length = int(np.sum(np.dot(bv[byteVecIdx:byteVecIdx + 4], BYTE_MULT)))  # type: ignore
                             byteVecIdx += 4
-                            # print(numTLVs, tlvtype, tlvlength)
+                            # print(numTLVs, tlv_type, tlv_
+                            # length)
 
                             # tlv payload
-                            if (TLV_type(tlvtype) == TLV_type.MMWDEMO_OUTPUT_MSG_DETECTED_POINTS):
+                            if (TLV_type(tlv_type) == TLV_type.MMWDEMO_OUTPUT_MSG_DETECTED_POINTS):
                                 # will not get this type if numDetectedObj == 0 even though gui monitor selects this type
                                 dt.detectedPoints_byteVecIdx = byteVecIdx
-                            # elif (tlvtype == TLV_type.MMWDEMO_OUTPUT_MSG_RANGE_PROFILE):
+                            # elif (tlv_type == TLV_type.MMWDEMO_OUTPUT_MSG_RANGE_PROFILE):
                             #     #Params.rangeProfile_byteVecIdx = byteVecIdx
                             #     pass
-                            # elif (tlvtype == TLV_type.MMWDEMO_OUTPUT_MSG_NOISE_PROFILE):
+                            # elif (tlv_type == TLV_type.MMWDEMO_OUTPUT_MSG_NOISE_PROFILE):
                             #     # processRangeNoiseProfile(bytevec, byteVecIdx, Params, false)
                             #     # gatherParamStats(Params.plot.noiseStats, getTimeDiff(start_tlv_ticks))
                             #     pass
-                            # elif (tlvtype == TLV_type.MMWDEMO_OUTPUT_MSG_AZIMUT_STATIC_HEAT_MAP):
+                            # elif (tlv_type == TLV_type.MMWDEMO_OUTPUT_MSG_AZIMUT_STATIC_HEAT_MAP):
                             #     pass
                             #     # processAzimuthHeatMap(bytevec, byteVecIdx, Params)
                             #     # gatherParamStats(Params.plot.azimuthStats, getTimeDiff(start_tlv_ticks))
-                            # elif (tlvtype == TLV_type.MMWDEMO_OUTPUT_MSG_RANGE_DOPPLER_HEAT_MAP):
+                            # elif (tlv_type == TLV_type.MMWDEMO_OUTPUT_MSG_RANGE_DOPPLER_HEAT_MAP):
                             #     pass
                             #     # processRangeDopplerHeatMap(bytevec, byteVecIdx, Params)
                             #     # gatherParamStats(Params.plot.dopplerStats, getTimeDiff(start_tlv_ticks))
-                            # elif (tlvtype == TLV_type.MMWDEMO_OUTPUT_MSG_STATS):
+                            # elif (tlv_type == TLV_type.MMWDEMO_OUTPUT_MSG_STATS):
                             #     pass
                             #     # processStatistics(bytevec, byteVecIdx, Params)
                             #     # gatherParamStats(Params.plot.cpuloadStats, getTimeDiff(start_tlv_ticks))
-                            # elif (tlvtype == TLV_type.MMWDEMO_OUTPUT_MSG_DETECTED_POINTS_SIDE_INFO):
+                            # elif (tlv_type == TLV_type.MMWDEMO_OUTPUT_MSG_DETECTED_POINTS_SIDE_INFO):
                             #     pass
                             #     # Params.sideInfo_byteVecIdx = byteVecIdx
-                            # elif (tlvtype == TLV_type.MMWDEMO_OUTPUT_MSG_AZIMUT_ELEVATION_STATIC_HEAT_MAP):
+                            # elif (tlv_type == TLV_type.MMWDEMO_OUTPUT_MSG_AZIMUT_ELEVATION_STATIC_HEAT_MAP):
                             #     pass
                             #     # processAzimuthElevHeatMap(bytevec, byteVecIdx, Params)
                             #     # gatherParamStats(Params.plot.azimuthElevStats, getTimeDiff(start_tlv_ticks))
-                            # elif (tlvtype == TLV_type.MMWDEMO_OUTPUT_MSG_TEMPERATURE_STATS):
+                            # elif (tlv_type == TLV_type.MMWDEMO_OUTPUT_MSG_TEMPERATURE_STATS):
                             #     pass
                             #     # processTemperatureStatistics(bytevec, byteVecIdx, Params)
                             #     # gatherParamStats(Params.plot.temperatureStats, getTimeDiff(start_tlv_ticks))
                             
 
-                            byteVecIdx += tlvlength
+                            byteVecIdx += tlv_length
                         
                         # print("TLV loop took {} seconds".format(time.time()-st_tlv))
                         if(dt.detectedPoints_byteVecIdx > -1):
@@ -316,7 +317,7 @@ class IWR6843AOP(Sensor):
 
 
     def stop_sensor(self):
-        """Close serial ports and set bools
+        """Close serial ports and update booleans
         """
         self._ser_config.close()  # type: ignore
         self._ser_data.close()  # type: ignore

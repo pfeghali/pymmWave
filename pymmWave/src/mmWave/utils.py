@@ -30,20 +30,20 @@ class frame:
     detectedPoints_byteVecIdx: int = -1
 
 
-def getXYZ_type2(vec: list[int], vecIdx: int, Params: frame, numDetecObj: int, sizeObj: int, raw_bv: Any):
-    numDetecObj = int(numDetecObj)
-    data = light_xyzd(np.zeros(numDetecObj), np.zeros(numDetecObj), np.zeros(numDetecObj), np.zeros(numDetecObj))  #type: ignore
+def getXYZ_type2(vec: list[int], vecIdx: int, Params: frame, num_detected_obj: int, sizeObj: int, raw_bv: Any):
+    num_detected_obj = int(num_detected_obj)
+    data = light_xyzd(np.zeros(num_detected_obj), np.zeros(num_detected_obj), np.zeros(num_detected_obj), np.zeros(num_detected_obj))  #type: ignore
     i: int
-    startIdx: int
+    start_idx: int
 
-    for i in range(numDetecObj):  
+    for i in range(num_detected_obj):  
         # /*start index in bytevec for this detected obj*/
-        startIdx = vecIdx + i * sizeObj
+        start_idx = vecIdx + i * sizeObj
         try:
-            data.x_coord[i] = unpack('f',bytes(vec[startIdx+0:startIdx+4]))[0]
-            data.y_coord[i] = unpack('f',bytes(vec[startIdx+4:startIdx+8]))[0]
-            data.z_coord[i] = unpack('f',bytes(vec[startIdx+8:startIdx+12]))[0]
-            data.doppler[i] = unpack('f',bytes(vec[startIdx+12:startIdx+16]))[0]
+            data.x_coord[i] = unpack('f',bytes(vec[start_idx+0:start_idx+4]))[0]
+            data.y_coord[i] = unpack('f',bytes(vec[start_idx+4:start_idx+8]))[0]
+            data.z_coord[i] = unpack('f',bytes(vec[start_idx+8:start_idx+12]))[0]
+            data.doppler[i] = unpack('f',bytes(vec[start_idx+12:start_idx+16]))[0]
         except:
             pass
 

@@ -1,7 +1,15 @@
 {
     "python.pythonPath": "/usr/local/anaconda3/envs/threenine/bin/python",
     "cSpell.words": [
+        "MMWDEMO",
         "MULT",
+        "Objs",
+        "TLVs",
+        "bytevec",
+        "dxdydz",
+        "pymm",
+        "rotvec",
+        "serialutil",
         "xyzd"
     ]
 }

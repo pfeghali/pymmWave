@@ -33,7 +33,7 @@ class xyzd(DataModel):
         """Translates and rotates the underlying object. This is done in-place, no further verification is done.
 
         Args:
-            location (Tuple[float, float, float]): Tuple of float values to shift the underlying data with: (x mtrs, y mtrs, z mtrs)
+            location (Tuple[float, float, float]): Tuple of float values to shift the underlying data with: (x meters, y meters, z meters)
             pitch_rads (Rotation): Rotation matrix object from scipy.spatial.transform.rotation.Rotation
         """
         if self._data.shape[0]:
@@ -60,16 +60,6 @@ class xyzd(DataModel):
 
     def __repr__(self) -> str:
         return f"xyzd with shape {self._data.shape}"
-
-class PotentialCollisions(DataModel):
-    """Notion of a potentil collision - currently unused.
-    """
-    def __init__(self, front: bool, back: bool, left: bool, right: bool):
-        self._col = (front, back, left, right)
-    
-    def get(self) -> tuple[bool, bool, bool, bool]:
-        return self._col
-
 
 class imu_data(DataModel):
     def __init__(self, altitude: float, dxdydz: tuple[float, float, float], yawpitchroll: tuple[float, float, float], heading: float) -> None:

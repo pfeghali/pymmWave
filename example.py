@@ -21,7 +21,7 @@ async def print_data(sens: Sensor):
         print((await sens.get_data()).get())
 
 
-asyncio.get_event_loop().create_task(sensor1.start_sensor())
+asyncio.get_event_loop().create_task(sensor1.start_sensor()) # type: ignore
 asyncio.get_event_loop().create_task(print_data(sensor1))
 
 asyncio.get_event_loop().run_forever()

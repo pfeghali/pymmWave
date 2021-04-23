@@ -82,7 +82,7 @@ class Sensor(ABC):
 
 class SpatialSensor(object):
     """Wrapper to provide the notion of a sensor in space
-    TODO: It could be fun to make another class which si a similair wrapper and
+    TODO: It could be fun to make another class which si a similar wrapper and
         preprocesses data to be in the right orientation at point of usage
     """
     def __init__(self, sens: Sensor, location: tuple[float, float, float], pitch_rads: tuple[float, float, float]):
