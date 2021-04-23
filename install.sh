@@ -1,0 +1,1 @@
+python -m pip install --force-reinstall ./pymmWave/dist/mmWave-0.1-py3-none-any.whl
