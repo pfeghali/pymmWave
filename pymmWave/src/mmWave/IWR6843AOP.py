@@ -1,5 +1,5 @@
 from typing import Optional
-from serial import Serial
+from serial import Serial # type: ignore
 from asyncio import Queue, sleep
 from time import time
 
@@ -17,7 +17,7 @@ class IWR6843AOP(Sensor):
     Args:
         Sensor (ABC): The sensor abstract base class
     """
-    def __init__(self, name, verbose=False):
+    def __init__(self, name: str, verbose: bool=False):
         """Initialize the sensor
 
         Args:
@@ -32,7 +32,7 @@ class IWR6843AOP(Sensor):
         self.name = name
 
         # Why a queue? This is forward looking. asyncio defaults to single threaded behavior and therefore this should
-        #   be thread safe by default. The upside of a queue is if this changes to a multi-process sytem on some executor,
+        #   be thread safe by default. The upside of a queue is if this changes to a multi-process system on some executor,
         #   this code remains valid as this is a safe shared option.
         self._active_data: Queue[xyzd] = Queue(1)
         self._freq: float = 10.0
@@ -71,8 +71,8 @@ class IWR6843AOP(Sensor):
     def _update_alive(self):
         """Internal func to verify the sensor is still connected
         """
-        if self._ser_config is not None and self._ser_data is not None:
-            self._is_alive = self._ser_config.is_open and self._ser_data.is_open
+        if self._ser_config is not None and self._ser_data is not None:  # type: ignore
+            self._is_alive = self._ser_config.is_open and self._ser_data.is_open  # type: ignore
 
         if not self._is_alive:
             self._config_sent = False
@@ -127,15 +127,15 @@ class IWR6843AOP(Sensor):
                     pass
                 else:
                     ln = line.replace('\r','')
-                    self._ser_config.write(ln.encode())
+                    self._ser_config.write(ln.encode())  # type: ignore
                     # print(ln)
                     # time.sleep(.2)
-                    ret = self._ser_config.readline()
-                    if self._verbose: print(ret)
-                    ret = self._ser_config.readline().decode('utf-8')[:-1]
+                    ret = self._ser_config.readline()  # type: ignore
+                    if self._verbose: print(ret)  # type: ignore
+                    ret = self._ser_config.readline().decode('utf-8')[:-1]  # type: ignore
                     if (ret != "Done") and (ret != "Ignored: Sensor is already stopped"):
                         failed = True
-                    if self._verbose: print(ret)
+                    if self._verbose: print(ret)  # type: ignore
 
             if not failed:
                 self._config_sent = True
@@ -143,7 +143,7 @@ class IWR6843AOP(Sensor):
         
         return False
 
-    async def start_sensor(self):
+    async def start_sensor(self) -> None:
         """Starts the sensor and will read data to a queue
 
         Raises:
@@ -161,8 +161,8 @@ class IWR6843AOP(Sensor):
             # Allows for context switching
             await sleep(ASYNC_SLEEP)
             try:
-                chunks = []
-                a: Optional[bytes] = self._ser_data.read_all()
+                chunks: list[bytes] = []
+                a: Optional[bytes] = self._ser_data.read_all()  # type: ignore
                 if a is None:
                     raise SerialException()
                 b = MAGIC_NUMBER
@@ -179,13 +179,13 @@ class IWR6843AOP(Sensor):
                     dt.tlv_version_uint16 = dt.tlv_version[2] + (dt.tlv_version[3] << 8)
                     byteVecIdx += 4
 
-                    bf = np.array([x for x in a[byteVecIdx:byteVecIdx + 4]])
-                    b_m = np.array(BYTE_MULT)
+                    bf = np.array([x for x in a[byteVecIdx:byteVecIdx + 4]])  # type: ignore
+                    b_m = np.array(BYTE_MULT)  # type: ignore
                     # Total packet length including header in Bytes, uint32
-                    totalPacketLen = int(np.sum(np.dot(bf, b_m)))
+                    totalPacketLen = int(np.sum(np.dot(bf, b_m)))  # type: ignore
                     byteVecIdx += 4
                     chunks.append(a)
-                    chunks.append(self._ser_data.read(totalPacketLen-8))
+                    chunks.append(self._ser_data.read(totalPacketLen-8))  # type: ignore
                     bv = [x for x in b''.join(chunks)]
                     raw_bv = b''.join(chunks)
                     
@@ -193,36 +193,36 @@ class IWR6843AOP(Sensor):
                         # print("VALID", totalPacketLen, len(bv))
 
                         #platform type, uint32: 0xA1643 or 0xA1443 
-                        dt.tlv_platform = np.sum(np.dot(bv[byteVecIdx:byteVecIdx + 4], BYTE_MULT))
+                        dt.tlv_platform = np.sum(np.dot(bv[byteVecIdx:byteVecIdx + 4], BYTE_MULT))  # type: ignore
                         byteVecIdx += 4
 
                         # Frame number, uint32
-                        dt.frameNumber = np.sum(np.dot(bv[byteVecIdx:byteVecIdx + 4], BYTE_MULT))
+                        dt.frameNumber = np.sum(np.dot(bv[byteVecIdx:byteVecIdx + 4], BYTE_MULT))  # type: ignore
                         byteVecIdx += 4
 
                         # Time in CPU cycles when the message was created. For AR16xx: DSP CPU cycles
-                        timeCpuCycles = np.sum(np.dot(bv[byteVecIdx:byteVecIdx + 4], BYTE_MULT))
+                        # timeCpuCycles = np.sum(np.dot(bv[byteVecIdx:byteVecIdx + 4], BYTE_MULT))  # type: ignore
                         byteVecIdx += 4
 
                         # Number of detected objects, uint32
-                        dt.numDetectedObj = np.sum(np.dot(bv[byteVecIdx:byteVecIdx + 4], BYTE_MULT))
+                        dt.numDetectedObj = np.sum(np.dot(bv[byteVecIdx:byteVecIdx + 4], BYTE_MULT))  # type: ignore
                         byteVecIdx += 4
 
                         # Number of TLVs, uint32
-                        numTLVs = int(np.sum(np.dot(bv[byteVecIdx:byteVecIdx + 4], BYTE_MULT)))
+                        numTLVs = int(np.sum(np.dot(bv[byteVecIdx:byteVecIdx + 4], BYTE_MULT)))  # type: ignore
                         byteVecIdx += 4
 
                         # print("Objs:", dt.numDetectedObj, numTLVs)
 
                         byteVecIdx += 4
 
-                        start_tlv_ticks: int
-                        for tlvidx in range(numTLVs):
+                        #  start_tlv_ticks: int
+                        for _ in range(numTLVs):
                             if(byteVecIdx>len(bv)):
                                 break
-                            tlvtype = np.sum(np.dot(bv[byteVecIdx:byteVecIdx + 4], BYTE_MULT))
+                            tlvtype = np.sum(np.dot(bv[byteVecIdx:byteVecIdx + 4], BYTE_MULT))  # type: ignore
                             byteVecIdx += 4
-                            tlvlength = int(np.sum(np.dot(bv[byteVecIdx:byteVecIdx + 4], BYTE_MULT)))
+                            tlvlength = int(np.sum(np.dot(bv[byteVecIdx:byteVecIdx + 4], BYTE_MULT)))  # type: ignore
                             byteVecIdx += 4
                             # print(numTLVs, tlvtype, tlvlength)
 
@@ -271,11 +271,11 @@ class IWR6843AOP(Sensor):
                             if detObjRes is not None:
                                 valid_doppler = np.greater(np.abs(detObjRes.doppler), self._doppler_filtering)
 
-                                obj_np = np.array([
+                                obj_np = np.array([                                 # type: ignore
                                         detObjRes.x_coord[valid_doppler],
                                         detObjRes.y_coord[valid_doppler],
                                         detObjRes.z_coord[valid_doppler],
-                                        detObjRes.doppler[valid_doppler]]).T
+                                        detObjRes.doppler[valid_doppler]]).T 
                                 obj: xyzd = xyzd(obj_np)
 
                                 if self._active_data.full():
@@ -318,8 +318,8 @@ class IWR6843AOP(Sensor):
     def stop_sensor(self):
         """Close serial ports and set bools
         """
-        self._ser_config.close()
-        self._ser_data.close()
+        self._ser_config.close()  # type: ignore
+        self._ser_data.close()  # type: ignore
 
         self._update_alive()
 
@@ -345,7 +345,7 @@ class IWR6843AOP(Sensor):
         return self._freq
 
     def __eq__(self, o: object) -> bool:
-        return 0
+        return False
 
     def __repr__(self) -> str:
         return f"{self.model()} is alive: {self._is_alive} at {self._freq}Hz."

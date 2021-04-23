@@ -13,7 +13,7 @@ if not sensor1.send_config(file, max_retries=1):
     print("Sending config failed")
     exit()
 
-sensor1.configure_filtering(.25)
+sensor1.configure_filtering(.1)
 
 async def print_data(sens: Sensor):
     await asyncio.sleep(2)

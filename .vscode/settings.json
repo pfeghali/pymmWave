@@ -1,3 +1,7 @@
 {
-    "python.pythonPath": "/usr/local/anaconda3/envs/threenine/bin/python"
+    "python.pythonPath": "/usr/local/anaconda3/envs/threenine/bin/python",
+    "cSpell.words": [
+        "MULT",
+        "xyzd"
+    ]
 }
