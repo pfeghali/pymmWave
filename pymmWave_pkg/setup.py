@@ -11,14 +11,14 @@ with open(path.join(path.abspath(path.dirname(__file__)), 'README.md'), encoding
 
 
 setup(
-   name="mmWave",
-   version='0.1.2',
-   py_modules=['mmWave'],
+   name="pymmWave",
+   version='1.0.0',
+   py_modules=['pymmWave'],
    description="A TI mmWave RADAR EVM integration library.",
    long_description=long_description,
    long_description_content_type="text/markdown",
-   url='',
+   url='https://pymmwave.readthedocs.io/en/latest/#',
    author_email='peterfeghali@ucsb.edu',
    include_package_data=True,
-#    install_requires=["numpy", "pyserial", "scipy"]
+   python_requires='>3.9'
 )

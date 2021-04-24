@@ -1,6 +1,6 @@
-from mmWave.sensor import Sensor
-from mmWave.IWR6843AOP import IWR6843AOP
-from mmWave.constants import EXAMPLE_CONFIG
+from pymmWave.sensor import Sensor
+from pymmWave.IWR6843AOP import IWR6843AOP
+from pymmWave.constants import EXAMPLE_CONFIG
 from asyncio import get_event_loop, sleep
 
 sensor1 = IWR6843AOP("1", verbose=False)
@@ -20,7 +20,7 @@ sensor1.configure_filtering(.1)
 async def print_data(sens: Sensor):
     await sleep(2)
     while True:
-        print((await sens.get_data()).get())
+        print(await sens.get_data())
 
 event_loop = get_event_loop()
 
