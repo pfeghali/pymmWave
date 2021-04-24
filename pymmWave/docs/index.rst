@@ -53,6 +53,8 @@ Install
 
 .. code-block::
 
+    pip install numpy scipy pyserial
+
     pip install pymmwave
 
 

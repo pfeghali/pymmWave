@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: mmWave
-Version: 0.1.1
+Version: 0.1.2
 Summary: A TI mmWave RADAR EVM integration library.
 Home-page: UNKNOWN
 Author-email: peterfeghali@ucsb.edu

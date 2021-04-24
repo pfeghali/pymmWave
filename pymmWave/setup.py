@@ -12,7 +12,7 @@ with open(path.join(path.abspath(path.dirname(__file__)), 'README.md'), encoding
 
 setup(
    name="mmWave",
-   version='0.1.1',
+   version='0.1.2',
    py_modules=['mmWave'],
    description="A TI mmWave RADAR EVM integration library.",
    long_description=long_description,
@@ -20,5 +20,5 @@ setup(
    url='',
    author_email='peterfeghali@ucsb.edu',
    include_package_data=True,
-   install_requires=["numpy", "pyserial", "scipy"]
+#    install_requires=["numpy", "pyserial", "scipy"]
 )

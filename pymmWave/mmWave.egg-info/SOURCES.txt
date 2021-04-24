@@ -4,5 +4,4 @@ setup.py
 mmWave.egg-info/PKG-INFO
 mmWave.egg-info/SOURCES.txt
 mmWave.egg-info/dependency_links.txt
-mmWave.egg-info/requires.txt
 mmWave.egg-info/top_level.txt
