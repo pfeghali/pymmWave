@@ -3,29 +3,29 @@ import numpy as np
 from scipy.spatial.transform.rotation import Rotation
 
 class DataModel(ABC):
-    """"
+    """
     Base Data Class
     """
 
-class xyzd(DataModel):
-    """Wrapper class for X, Y, Z, and doppler data.
+class DopplerPointCloud(DataModel):
+    """Fairly lightweight class for X, Y, Z, and doppler data.
     """
     def __init__(self, data: np.ndarray): 
-        """Initialize a XYZD object and verify shape is valid.
+        """Initialize a DopplerPointCloud object and verify the input shape is valid.
 
         Args:
-            data (np.ndarray): Nx4 size ndarray.
+            data (np.ndarray): Nx4 size numpy.ndarray.
         """
         assert len(data.shape) == 2
         assert data.shape[1] == 4
 
-        self._data = data
+        self._data: np.ndarray = data
 
     def get(self) -> np.ndarray:
-        """Gets the underlying data
+        """Gets the underlying data container.
 
         Returns:
-            np.ndarray: Data in object
+            np.ndarray: The underlying data matrix.
         """
         return self._data
 
@@ -42,11 +42,11 @@ class xyzd(DataModel):
             self._data[:,2] += location[2]
             self._data[:,:3] = pitch_rads.apply(self._data[:,:3])  #type: ignore
 
-    def append(self, other: 'xyzd') -> bool:
-        """Append another XYZD object to this one in-place
+    def append(self, other: 'DopplerPointCloud') -> bool:
+        """Append another DopplerPointCloud object to this one in-place
 
         Args:
-            other (xyzd): Another object of the same type
+            other (DopplerPointCloud): Another object of the same type
 
         Returns:
             bool: If success, true.
@@ -59,9 +59,9 @@ class xyzd(DataModel):
         return False
 
     def __repr__(self) -> str:
-        return f"xyzd with shape {self._data.shape}"
+        return self._data.__repr__()
 
-class imu_data(DataModel):
+class _imu_data(DataModel):
     def __init__(self, altitude: float, dxdydz: tuple[float, float, float], yawpitchroll: tuple[float, float, float], heading: float) -> None:
         self._altitude: float = altitude
         self._dxdydz: tuple[float, float, float] = dxdydz
@@ -80,7 +80,7 @@ class imu_data(DataModel):
     def get_yawpitchroll(self) -> tuple[float, float, float]:
         return self._yawpitchroll
 
-class speed_constraints(DataModel):
+class _speed_constraints(DataModel):
     def __init__(self, max_x: tuple[float, float], max_y: tuple[float, float], max_z: tuple[float, float]) -> None:
         self._max_x = max_x
         self._max_y = max_y

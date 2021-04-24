@@ -1,4 +1,7 @@
-from typing import Optional
+from dataclasses import dataclass
+from typing import Any, Optional
+from struct import unpack
+
 from serial import Serial # type: ignore
 from asyncio import Queue, sleep
 from time import time
@@ -6,16 +9,14 @@ from time import time
 import numpy as np
 from serial.serialutil import SerialException
 
-from .data_model import xyzd
+from .data_model import DopplerPointCloud
 from .sensor import Sensor
 from .constants import TLV_type, BYTE_MULT, ASYNC_SLEEP, MAGIC_NUMBER
-from .utils import frame, processDetectedPoints
 
 class IWR6843AOP(Sensor):
-    """Specific sensor class for interfacing with the default board
-
-    Args:
-        Sensor (ABC): The sensor abstract base class
+    """Abstract :obj:`Sensor<mmWave.sensor.Sensor>` class implementation for interfacing with the COTS TI IWR6843AOP evaluation board.
+    Can be initialized with a public 'name', which can be used for sensor reference. This class supports point-cloud retrieval with doppler information on a per-point basis.
+    The class can also be designed to automatically filter by doppler data to limit noisy data points.
     """
     def __init__(self, name: str, verbose: bool=False):
         """Initialize the sensor
@@ -34,39 +35,140 @@ class IWR6843AOP(Sensor):
         # Why a queue? This is forward looking. asyncio defaults to single threaded behavior and therefore this should
         #   be thread safe by default. The upside of a queue is if this changes to a multi-process system on some executor,
         #   this code remains valid as this is a safe shared option.
-        self._active_data: Queue[xyzd] = Queue(1)
+        self._active_data: Queue[DopplerPointCloud] = Queue(1)
         self._freq: float = 10.0
         self._last_t: float = 0.0
 
-    def connect_config(self, com_port: str, baud_rate: int) -> bool:
-        """Connect the config port. Must be done before sending config.
+    @dataclass
+    class _light_doppler_cloud:
+        x_coord: np.ndarray
+        y_coord: np.ndarray
+        z_coord: np.ndarray
+        doppler: np.ndarray
+
+
+
+    @dataclass(init=False)
+    class _frame:
+        """Frame class for the sensor. Only holds data attributes, similar to a struct
+        """
+        packet: float
+        idxPacket: float
+        header: float
+        detObj: float
+        rp: float
+        np: float
+        tlv_version: bytes
+        tlv_version_uint16: int
+        tlv_platform: int
+        frameNumber: int
+        numDetectedObj: int = -1
+        detectedPoints_byteVecIdx: int = -1
+
+
+    def _getXYZ_type2(self, vec: list[int], vecIdx: int, Params: _frame, num_detected_obj: int, sizeObj: int, raw_bv: Any):
+        num_detected_obj = int(num_detected_obj)
+        data = self._light_doppler_cloud(np.zeros(num_detected_obj), np.zeros(num_detected_obj), np.zeros(num_detected_obj), np.zeros(num_detected_obj))  #type: ignore
+        i: int
+        start_idx: int
+
+        for i in range(num_detected_obj):  
+            # /*start index in bytevec for this detected obj*/
+            start_idx = vecIdx + i * sizeObj
+            try:
+                data.x_coord[i] = unpack('f',bytes(vec[start_idx+0:start_idx+4]))[0]
+                data.y_coord[i] = unpack('f',bytes(vec[start_idx+4:start_idx+8]))[0]
+                data.z_coord[i] = unpack('f',bytes(vec[start_idx+8:start_idx+12]))[0]
+                data.doppler[i] = unpack('f',bytes(vec[start_idx+12:start_idx+16]))[0]
+            except:
+                pass
+
+        return data
+
+
+    def _processDetectedPoints(self, bv: list[int], idx: int, dt: _frame, raw_bv: Any) -> Optional[_light_doppler_cloud]:
+        """Processes detected points from a byte vector, unpacks floats as well.
+        This is some preset structure that we are breaking down
+        """
+        if (dt.numDetectedObj > 0):
+            sizeofObj: int = 16
+                    
+            return self._getXYZ_type2(bv, idx, dt, dt.numDetectedObj, sizeofObj, raw_bv)
+
+        return None
+
+
+
+    def connect_config(self, com_port: str, baud_rate: int, timeout: int=1) -> bool:
+        """Connect to the config port. Must be done before sending config.
+        This function will timeout after a second by default. This timeout period is low since programmatically connecting to serial ports might be difficult with long timeout periods, as it is difficult to know apriori if you are connecting to config or data.
 
         Args:
             com_port (str): Port name to use
             baud_rate (int): Baud rate
+            timeout (int, optional): Timeout. Defaults to 1.
 
         Returns:
             bool: True if successful
+
+        Example:
+            On MacOS, for example:
+
+            >>> my_sensor.connect_config('/dev/tty.SLAB_USBtoUART4', 115200)
+            True
+
         """
-        self._ser_config = Serial(com_port, baud_rate, timeout=1)
+        try:
+            self._ser_config = Serial(com_port, baud_rate, timeout=timeout)
+        except SerialException as e:
+            print(e)
+            return False
+        except FileNotFoundError:
+            print(f"{com_port} is an invalid serial port.")
+            return False
+        except ValueError:
+            print("Baud rate is invalid.")
+            return False
+
         self._update_alive()
-        # print(self._ser_config.isOpen())
+
         return True
 
-    def connect_data(self, com_port: str, baud_rate: int) -> bool:
+    def connect_data(self, com_port: str, baud_rate: int, timeout: int=1) -> bool:
         """Connect the data serial port. Must be done before sending config.
 
         Args:
             com_port (str): Port name to use
             baud_rate (int): Baud rate
+            timeout (int, optional): Timeout. Defaults to 1.
 
         Returns:
             bool: True if successful
+
+        Example:
+            On MacOS, for example:
+
+            >>> my_sensor.connect_data('/dev/tty.SLAB_USBtoUART', 921600)
+            True
         """
 
-        self._ser_data = Serial(com_port, baud_rate, timeout=1)
+        try:
+            self._ser_data = Serial(com_port, baud_rate, timeout=timeout)
+        except SerialException as e:
+            print(e)
+            return False
+        except FileNotFoundError:
+            print(f"{com_port} is an invalid serial port.")
+            return False
+        except ValueError:
+            print("Baud rate is invalid.")
+            return False
+
         self._update_alive()
-        return self.is_alive()
+
+        return True
+
+
 
     def _update_alive(self):
         """Internal func to verify the sensor is still connected
@@ -78,17 +180,17 @@ class IWR6843AOP(Sensor):
             self._config_sent = False
 
     def is_alive(self) -> bool:
-        """Getter which verifies connection
+        """Getter which verifies connection to this particular sensor.
 
         Returns:
-            bool: State of sensor connection
+            bool: True if the sensor is still connected.
         """
 
         self._update_alive()
         return self._is_alive
 
     def type(self) -> Sensor.SensorType:
-        """Returns sensor type
+        """Returns enum :obj:`Sensor.SensorType<mmWave.Sensor.SensorType>`
 
         Returns:
             Sensor.SensorType.POINT_CLOUD3D
@@ -96,7 +198,7 @@ class IWR6843AOP(Sensor):
         return Sensor.SensorType.POINT_CLOUD3D
 
     def model(self) -> str:
-        """Returns sensor type
+        """Returns the particular model number supported with this class.
 
         Returns:
             str: "IWR6843AOP"
@@ -104,7 +206,8 @@ class IWR6843AOP(Sensor):
         return "IWR6843AOP"
 
     def send_config(self, config: list[str], max_retries: int=1) -> bool:
-        """Sends config with a retry mechanism
+        """Tried to send a TI config, with a simple retry mechanism.
+        Configuration files can be created here: `https://dev.ti.com/gallery/view/mmwave/mmWave_Demo_Visualizer/ver/3.5.0/`. Future support may be built for creating configuration files.
 
         Args:
             config (list[str]): List of strings making up the config
@@ -112,6 +215,9 @@ class IWR6843AOP(Sensor):
 
         Returns:
             bool: If sending was successful
+
+        Raises:
+            SerialException: If device is disconnected before completion, SerialExceptions may be raised.
         """
         if not self._is_alive:
             self._config_sent = False
@@ -144,10 +250,15 @@ class IWR6843AOP(Sensor):
         return False
 
     async def start_sensor(self) -> None:
-        """Starts the sensor and will read data to a queue
+        """Starts the sensor and will place data into a queue.
+        The goal of this function is to manage the state of the entire application. Nothing will happen if this function is not run with asyncio.
+        This function attempts to read data from the sensor as quickly as it can, then extract positional+doppler data, and place data into an asyncio.Queue.
+        Since this relies on the asyncio Queue, limitations may stem from asyncio. These issues, mainly revolving around thread safety, can be dealt with at the application layer.
+
+        This function also actively attempts to context switch between intervals to minimize overhead.
 
         Raises:
-            Exception: If sensor has some failure, will throw an exception
+            Exception: If sensor has some failure, will throw a SerialException.
         """
         self._last_t = time()
 
@@ -169,8 +280,7 @@ class IWR6843AOP(Sensor):
                 index = [x for x in range(len(a)) if a[x:x+len(b)] == b]
                 # print(a)
                 if len(index) > 0:
-                    dt: frame = frame()
-
+                    dt = self._frame()
                     # Header
                     byteVecIdx = index[0]+8 # magic word (4 unit16)
                     #numDetectedObj = 0
@@ -267,7 +377,7 @@ class IWR6843AOP(Sensor):
                         
                         # print("TLV loop took {} seconds".format(time.time()-st_tlv))
                         if(dt.detectedPoints_byteVecIdx > -1):
-                            detObjRes = processDetectedPoints(bv, dt.detectedPoints_byteVecIdx, dt, raw_bv)
+                            detObjRes = self._processDetectedPoints(bv, dt.detectedPoints_byteVecIdx, dt, raw_bv)
 
                             if detObjRes is not None:
                                 valid_doppler = np.greater(np.abs(detObjRes.doppler), self._doppler_filtering)
@@ -277,7 +387,7 @@ class IWR6843AOP(Sensor):
                                         detObjRes.y_coord[valid_doppler],
                                         detObjRes.z_coord[valid_doppler],
                                         detObjRes.doppler[valid_doppler]]).T 
-                                obj: xyzd = xyzd(obj_np)
+                                obj: DopplerPointCloud = DopplerPointCloud(obj_np)
 
                                 if self._active_data.full():
                                     self._active_data.get_nowait()
@@ -288,11 +398,12 @@ class IWR6843AOP(Sensor):
                 pass
         return None
         
-    async def get_data(self) -> xyzd:
-        """Returns data if it is ready
+    async def get_data(self) -> DopplerPointCloud:
+        """Returns data when it is ready. This function also updates the frequency measurement of the sensor.
+        This function is blocking.
 
         Returns:
-            data light_xyzd or none
+            DopplerPointCloud: [description]
         """
         data = await self._active_data.get()
         tt = time()
@@ -301,11 +412,11 @@ class IWR6843AOP(Sensor):
         return data
         
 
-    def get_data_nowait(self) -> Optional[xyzd]:
-        """Returns data if it is ready
+    def get_data_nowait(self) -> Optional[DopplerPointCloud]:
+        """Returns data if it is ready, otherwise none. This function also updates the frequency measurement of the sensor if data is available.
 
         Returns:
-            data light_xyzd or none
+            Optional[DopplerPointCloud]: Data if there is data available, otherwise returns None.
         """
         if(self._active_data.full()):
             tt = time()
@@ -317,15 +428,18 @@ class IWR6843AOP(Sensor):
 
 
     def stop_sensor(self):
-        """Close serial ports and update booleans
+        """This function attempts to close all serial ports and update internal state booleans.
         """
-        self._ser_config.close()  # type: ignore
-        self._ser_data.close()  # type: ignore
-
+        try:
+            self._ser_config.close()  # type: ignore
+            self._ser_data.close()  # type: ignore
+        except SerialException:
+            pass
         self._update_alive()
 
     def configure_filtering(self, doppler_filtering: float=0) -> bool:
-        """Sets basic doppler filtering to allow static noise removal
+        """Sets basic doppler filtering to allow for static noise removal.
+        Doppler filtering sets a floor for doppler results, to remove points less than the input.
 
         Args:
             doppler_filtering (float, optional): Doppler removal level, recommended to be fairly low. Defaults to 0.
@@ -338,7 +452,7 @@ class IWR6843AOP(Sensor):
         return True
 
     def get_update_freq(self) -> float:
-        """Returns the frequency that the sensor is returning data at
+        """Returns the frequency that the sensor is returning data at. This is not equivalent to the true capacity of the sensor, but rather the rate which the application is successfully getting data.
 
         Returns:
             float: Hz

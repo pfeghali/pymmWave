@@ -17,3 +17,4 @@ class TLV_type(Enum):
 
 ASYNC_SLEEP: float
 MAGIC_NUMBER: bytes
+EXAMPLE_CONFIG: list[str]
