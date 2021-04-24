@@ -10,10 +10,10 @@ build:
 
 # Build documentation in the docs/ directory with Sphinx
 sphinx:
-   configuration: pymmWave/docs/conf.py
+   configuration: pymmWave_pkg/docs/conf.py
 
 # Optionally set the version of Python and requirements required to build your docs
 python:
    version: 3.9
    install:
-   - requirements: pymmWave/docs/requirements.txt
+   - requirements: pymmWave_pkg/docs/requirements.txt
