@@ -12,9 +12,9 @@ A motivating example:
 .. code-block::
    :linenos:
 
-    from mmWave.sensor import Sensor
-    from mmWave.IWR6843AOP import IWR6843AOP
-    from mmWave.constants import EXAMPLE_CONFIG
+    from pymmWave.sensor import Sensor
+    from pymmWave.IWR6843AOP import IWR6843AOP
+    from pymmWave.constants import EXAMPLE_CONFIG
     from asyncio import get_event_loop, sleep
 
     sensor1 = IWR6843AOP("1", verbose=False)
@@ -47,6 +47,8 @@ This simple working example demonstrates how with simple asynchronous integratio
 This library was designed to work with the commercial off-the-shelf (COTS) TI IWR6843AOPEVM. While TI does provide a web interface to this product, there were no straightforward Python implementations available.
 
 The goal of this library is such that if you purchase this EVM, within minutes of unboxing, it should be hackable in Python.
+
+It should be noted that this package requires python >3.9. This is solely due to type hinting. It should be simple to clone the github, and modify the package to support `typing` classes. We expect this can be accomplished with Python >3.7.
 
 Install
 ========
