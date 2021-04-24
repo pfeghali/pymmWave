@@ -9,12 +9,22 @@ pymmWave is an asynchronous TI mmWave library to expedite mmWave development.
 
 A motivating example:
 
+First get the serial ports which your sensor is using.
+
+.. code-block:: console
+
+    $ ls /dev/tty.*
+    ... /dev/tty.SLAB_USBtoUART4     /dev/tty.SLAB_USBtoUART
+
+
+Insert the serial ports to the config and data arguments, and thats it!
+
 .. code-block::
    :linenos:
 
-    from mmWave.sensor import Sensor
-    from mmWave.IWR6843AOP import IWR6843AOP
-    from mmWave.constants import EXAMPLE_CONFIG
+    from pymmWave.sensor import Sensor
+    from pymmWave.IWR6843AOP import IWR6843AOP
+    from pymmWave.constants import EXAMPLE_CONFIG
     from asyncio import get_event_loop, sleep
 
     sensor1 = IWR6843AOP("1", verbose=False)
@@ -48,10 +58,14 @@ This library was designed to work with the commercial off-the-shelf (COTS) TI IW
 
 The goal of this library is such that if you purchase this EVM, within minutes of unboxing, it should be hackable in Python.
 
+It should be noted that this package requires python >3.9. This is solely due to type hinting. It should be simple to clone the github, and modify the package to support `typing` classes. We expect this can be accomplished with Python >3.7.
+
 Install
 ========
 
 .. code-block::
+
+    pip install numpy scipy pyserial
 
     pip install pymmwave
 
@@ -73,23 +87,23 @@ Notably, Jackie Burd, Tiffany Cowan, Peter Feghali, Yogananda Isukapalli, Cher L
 
 IWR6843AOPEVM Implementation
 ============================
-.. automodule:: mmWave.IWR6843AOP
+.. automodule:: pymmWave.IWR6843AOP
     :members:
 
 Abstract Sensor Class
 =====================
-.. automodule:: mmWave.sensor
+.. automodule:: pymmWave.sensor
     :members:
 
 
 Data Model
 ==================
-.. automodule:: mmWave.data_model
+.. automodule:: pymmWave.data_model
     :members:
 
 Utilities
 ==================
-.. automodule:: mmWave.utils
+.. automodule:: pymmWave.utils
     :members:
 
 

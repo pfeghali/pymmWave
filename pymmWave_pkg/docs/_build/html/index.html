@@ -88,10 +88,10 @@
 <li><a class="reference internal" href="#install">Install</a></li>
 <li><a class="reference internal" href="#roadmap">Roadmap</a></li>
 <li><a class="reference internal" href="#contributors">Contributors</a></li>
-<li><a class="reference internal" href="#module-mmWave.IWR6843AOP">IWR6843AOPEVM Implementation</a></li>
-<li><a class="reference internal" href="#module-mmWave.sensor">Abstract Sensor Class</a></li>
-<li><a class="reference internal" href="#module-mmWave.data_model">Data Model</a></li>
-<li><a class="reference internal" href="#module-mmWave.utils">Utilities</a></li>
+<li><a class="reference internal" href="#module-pymmWave.IWR6843AOP">IWR6843AOPEVM Implementation</a></li>
+<li><a class="reference internal" href="#module-pymmWave.sensor">Abstract Sensor Class</a></li>
+<li><a class="reference internal" href="#module-pymmWave.data_model">Data Model</a></li>
+<li><a class="reference internal" href="#module-pymmWave.utils">Utilities</a></li>
 <li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
 </ul>
 </div>
@@ -166,6 +166,12 @@
 </div>
 <p>pymmWave is an asynchronous TI mmWave library to expedite mmWave development.</p>
 <p>A motivating example:</p>
+<p>First get the serial ports which your sensor is using.</p>
+<div class="highlight-console notranslate"><div class="highlight"><pre><span></span><span class="gp">$ </span>ls /dev/tty.*
+<span class="go">... /dev/tty.SLAB_USBtoUART4     /dev/tty.SLAB_USBtoUART</span>
+</pre></div>
+</div>
+<p>Insert the serial ports to the config and data arguments, and thats it!</p>
 <div class="highlight-default notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span class="normal"> 1</span>
 <span class="normal"> 2</span>
 <span class="normal"> 3</span>
@@ -194,9 +200,9 @@
 <span class="normal">26</span>
 <span class="normal">27</span>
 <span class="normal">28</span>
-<span class="normal">29</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span> <span class="kn">from</span> <span class="nn">mmWave.sensor</span> <span class="kn">import</span> <span class="n">Sensor</span>
- <span class="kn">from</span> <span class="nn">mmWave.IWR6843AOP</span> <span class="kn">import</span> <span class="n">IWR6843AOP</span>
- <span class="kn">from</span> <span class="nn">mmWave.constants</span> <span class="kn">import</span> <span class="n">EXAMPLE_CONFIG</span>
+<span class="normal">29</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span> <span class="kn">from</span> <span class="nn">pymmWave.sensor</span> <span class="kn">import</span> <span class="n">Sensor</span>
+ <span class="kn">from</span> <span class="nn">pymmWave.IWR6843AOP</span> <span class="kn">import</span> <span class="n">IWR6843AOP</span>
+ <span class="kn">from</span> <span class="nn">pymmWave.constants</span> <span class="kn">import</span> <span class="n">EXAMPLE_CONFIG</span>
  <span class="kn">from</span> <span class="nn">asyncio</span> <span class="kn">import</span> <span class="n">get_event_loop</span><span class="p">,</span> <span class="n">sleep</span>
 
  <span class="n">sensor1</span> <span class="o">=</span> <span class="n">IWR6843AOP</span><span class="p">(</span><span class="s2">&quot;1&quot;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
@@ -228,10 +234,13 @@
 <p>This simple working example demonstrates how with simple asynchronous integration, realtime applications can integrate with mmWave sensors easily.</p>
 <p>This library was designed to work with the commercial off-the-shelf (COTS) TI IWR6843AOPEVM. While TI does provide a web interface to this product, there were no straightforward Python implementations available.</p>
 <p>The goal of this library is such that if you purchase this EVM, within minutes of unboxing, it should be hackable in Python.</p>
+<p>It should be noted that this package requires python &gt;3.9. This is solely due to type hinting. It should be simple to clone the github, and modify the package to support <cite>typing</cite> classes. We expect this can be accomplished with Python &gt;3.7.</p>
 </div>
 <div class="section" id="install">
 <h1>Install<a class="headerlink" href="#install" title="Permalink to this headline">¶</a></h1>
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">pymmwave</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pip</span> <span class="n">install</span> <span class="n">numpy</span> <span class="n">scipy</span> <span class="n">pyserial</span>
+
+<span class="n">pip</span> <span class="n">install</span> <span class="n">pymmwave</span>
 </pre></div>
 </div>
 </div>
@@ -246,17 +255,17 @@
 <p>Thanks to the University of California, Santa Barbara, and AeroVironment for providing the backing for this tools creation.</p>
 <p>Notably, Jackie Burd, Tiffany Cowan, Peter Feghali, Yogananda Isukapalli, Cher Lin, Swetha Pillai, Scott Rasmussen, and Phil Tokumaru.</p>
 </div>
-<div class="section" id="module-mmWave.IWR6843AOP">
-<span id="iwr6843aopevm-implementation"></span><h1>IWR6843AOPEVM Implementation<a class="headerlink" href="#module-mmWave.IWR6843AOP" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-pymmWave.IWR6843AOP">
+<span id="iwr6843aopevm-implementation"></span><h1>IWR6843AOPEVM Implementation<a class="headerlink" href="#module-pymmWave.IWR6843AOP" title="Permalink to this headline">¶</a></h1>
 <dl class="py class">
-<dt id="mmWave.IWR6843AOP.IWR6843AOP">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">mmWave.IWR6843AOP.</span></code><code class="sig-name descname"><span class="pre">IWR6843AOP</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mmWave.IWR6843AOP.IWR6843AOP" title="Permalink to this definition">¶</a></dt>
-<dd><p>Abstract <a class="reference internal" href="#mmWave.sensor.Sensor" title="mmWave.sensor.Sensor"><code class="xref py py-obj docutils literal notranslate"><span class="pre">Sensor</span></code></a> class implementation for interfacing with the COTS TI IWR6843AOP evaluation board.
+<dt id="pymmWave.IWR6843AOP.IWR6843AOP">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">pymmWave.IWR6843AOP.</span></code><code class="sig-name descname"><span class="pre">IWR6843AOP</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">name</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">verbose</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymmWave.IWR6843AOP.IWR6843AOP" title="Permalink to this definition">¶</a></dt>
+<dd><p>Abstract <code class="xref py py-obj docutils literal notranslate"><span class="pre">Sensor</span></code> class implementation for interfacing with the COTS TI IWR6843AOP evaluation board.
 Can be initialized with a public ‘name’, which can be used for sensor reference. This class supports point-cloud retrieval with doppler information on a per-point basis.
 The class can also be designed to automatically filter by doppler data to limit noisy data points.</p>
 <dl class="py method">
-<dt id="mmWave.IWR6843AOP.IWR6843AOP.configure_filtering">
-<code class="sig-name descname"><span class="pre">configure_filtering</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">doppler_filtering</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">bool</span><a class="headerlink" href="#mmWave.IWR6843AOP.IWR6843AOP.configure_filtering" title="Permalink to this definition">¶</a></dt>
+<dt id="pymmWave.IWR6843AOP.IWR6843AOP.configure_filtering">
+<code class="sig-name descname"><span class="pre">configure_filtering</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">doppler_filtering</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">0</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">bool</span><a class="headerlink" href="#pymmWave.IWR6843AOP.IWR6843AOP.configure_filtering" title="Permalink to this definition">¶</a></dt>
 <dd><p>Sets basic doppler filtering to allow for static noise removal.
 Doppler filtering sets a floor for doppler results, to remove points less than the input.</p>
 <dl class="field-list simple">
@@ -273,8 +282,8 @@ Doppler filtering sets a floor for doppler results, to remove points less than t
 </dd></dl>
 
 <dl class="py method">
-<dt id="mmWave.IWR6843AOP.IWR6843AOP.connect_config">
-<code class="sig-name descname"><span class="pre">connect_config</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">com_port</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">baud_rate</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">bool</span><a class="headerlink" href="#mmWave.IWR6843AOP.IWR6843AOP.connect_config" title="Permalink to this definition">¶</a></dt>
+<dt id="pymmWave.IWR6843AOP.IWR6843AOP.connect_config">
+<code class="sig-name descname"><span class="pre">connect_config</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">com_port</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">baud_rate</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">bool</span><a class="headerlink" href="#pymmWave.IWR6843AOP.IWR6843AOP.connect_config" title="Permalink to this definition">¶</a></dt>
 <dd><p>Connect to the config port. Must be done before sending config.
 This function will timeout after a second by default. This timeout period is low since programmatically connecting to serial ports might be difficult with long timeout periods, as it is difficult to know apriori if you are connecting to config or data.</p>
 <dl class="field-list simple">
@@ -301,8 +310,8 @@ This function will timeout after a second by default. This timeout period is low
 </dd></dl>
 
 <dl class="py method">
-<dt id="mmWave.IWR6843AOP.IWR6843AOP.connect_data">
-<code class="sig-name descname"><span class="pre">connect_data</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">com_port</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">baud_rate</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">bool</span><a class="headerlink" href="#mmWave.IWR6843AOP.IWR6843AOP.connect_data" title="Permalink to this definition">¶</a></dt>
+<dt id="pymmWave.IWR6843AOP.IWR6843AOP.connect_data">
+<code class="sig-name descname"><span class="pre">connect_data</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">com_port</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">baud_rate</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">timeout</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">bool</span><a class="headerlink" href="#pymmWave.IWR6843AOP.IWR6843AOP.connect_data" title="Permalink to this definition">¶</a></dt>
 <dd><p>Connect the data serial port. Must be done before sending config.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -328,8 +337,8 @@ This function will timeout after a second by default. This timeout period is low
 </dd></dl>
 
 <dl class="py method">
-<dt id="mmWave.IWR6843AOP.IWR6843AOP.get_data">
-<em class="property"><span class="pre">async</span> </em><code class="sig-name descname"><span class="pre">get_data</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <a class="reference internal" href="#mmWave.data_model.DopplerPointCloud" title="mmWave.data_model.DopplerPointCloud"><span class="pre">mmWave.data_model.DopplerPointCloud</span></a><a class="headerlink" href="#mmWave.IWR6843AOP.IWR6843AOP.get_data" title="Permalink to this definition">¶</a></dt>
+<dt id="pymmWave.IWR6843AOP.IWR6843AOP.get_data">
+<em class="property"><span class="pre">async</span> </em><code class="sig-name descname"><span class="pre">get_data</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <a class="reference internal" href="#pymmWave.data_model.DopplerPointCloud" title="pymmWave.data_model.DopplerPointCloud"><span class="pre">pymmWave.data_model.DopplerPointCloud</span></a><a class="headerlink" href="#pymmWave.IWR6843AOP.IWR6843AOP.get_data" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns data when it is ready. This function also updates the frequency measurement of the sensor.
 This function is blocking.</p>
 <dl class="field-list simple">
@@ -337,28 +346,28 @@ This function is blocking.</p>
 <dd class="field-odd"><p>[description]</p>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p><a class="reference internal" href="#mmWave.data_model.DopplerPointCloud" title="mmWave.data_model.DopplerPointCloud">DopplerPointCloud</a></p>
+<dd class="field-even"><p><a class="reference internal" href="#pymmWave.data_model.DopplerPointCloud" title="pymmWave.data_model.DopplerPointCloud">DopplerPointCloud</a></p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
-<dt id="mmWave.IWR6843AOP.IWR6843AOP.get_data_nowait">
-<code class="sig-name descname"><span class="pre">get_data_nowait</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#mmWave.data_model.DopplerPointCloud" title="mmWave.data_model.DopplerPointCloud"><span class="pre">mmWave.data_model.DopplerPointCloud</span></a><span class="p"><span class="pre">]</span></span><a class="headerlink" href="#mmWave.IWR6843AOP.IWR6843AOP.get_data_nowait" title="Permalink to this definition">¶</a></dt>
+<dt id="pymmWave.IWR6843AOP.IWR6843AOP.get_data_nowait">
+<code class="sig-name descname"><span class="pre">get_data_nowait</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pymmWave.data_model.DopplerPointCloud" title="pymmWave.data_model.DopplerPointCloud"><span class="pre">pymmWave.data_model.DopplerPointCloud</span></a><span class="p"><span class="pre">]</span></span><a class="headerlink" href="#pymmWave.IWR6843AOP.IWR6843AOP.get_data_nowait" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns data if it is ready, otherwise none. This function also updates the frequency measurement of the sensor if data is available.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>Data if there is data available, otherwise returns None.</p>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p>Optional[<a class="reference internal" href="#mmWave.data_model.DopplerPointCloud" title="mmWave.data_model.DopplerPointCloud">DopplerPointCloud</a>]</p>
+<dd class="field-even"><p>Optional[<a class="reference internal" href="#pymmWave.data_model.DopplerPointCloud" title="pymmWave.data_model.DopplerPointCloud">DopplerPointCloud</a>]</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
-<dt id="mmWave.IWR6843AOP.IWR6843AOP.get_update_freq">
-<code class="sig-name descname"><span class="pre">get_update_freq</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">float</span><a class="headerlink" href="#mmWave.IWR6843AOP.IWR6843AOP.get_update_freq" title="Permalink to this definition">¶</a></dt>
+<dt id="pymmWave.IWR6843AOP.IWR6843AOP.get_update_freq">
+<code class="sig-name descname"><span class="pre">get_update_freq</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">float</span><a class="headerlink" href="#pymmWave.IWR6843AOP.IWR6843AOP.get_update_freq" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the frequency that the sensor is returning data at. This is not equivalent to the true capacity of the sensor, but rather the rate which the application is successfully getting data.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -371,8 +380,8 @@ This function is blocking.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="mmWave.IWR6843AOP.IWR6843AOP.is_alive">
-<code class="sig-name descname"><span class="pre">is_alive</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">bool</span><a class="headerlink" href="#mmWave.IWR6843AOP.IWR6843AOP.is_alive" title="Permalink to this definition">¶</a></dt>
+<dt id="pymmWave.IWR6843AOP.IWR6843AOP.is_alive">
+<code class="sig-name descname"><span class="pre">is_alive</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">bool</span><a class="headerlink" href="#pymmWave.IWR6843AOP.IWR6843AOP.is_alive" title="Permalink to this definition">¶</a></dt>
 <dd><p>Getter which verifies connection to this particular sensor.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -385,8 +394,8 @@ This function is blocking.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="mmWave.IWR6843AOP.IWR6843AOP.model">
-<code class="sig-name descname"><span class="pre">model</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">str</span><a class="headerlink" href="#mmWave.IWR6843AOP.IWR6843AOP.model" title="Permalink to this definition">¶</a></dt>
+<dt id="pymmWave.IWR6843AOP.IWR6843AOP.model">
+<code class="sig-name descname"><span class="pre">model</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">str</span><a class="headerlink" href="#pymmWave.IWR6843AOP.IWR6843AOP.model" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the particular model number supported with this class.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -399,8 +408,8 @@ This function is blocking.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="mmWave.IWR6843AOP.IWR6843AOP.send_config">
-<code class="sig-name descname"><span class="pre">send_config</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_retries</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">bool</span><a class="headerlink" href="#mmWave.IWR6843AOP.IWR6843AOP.send_config" title="Permalink to this definition">¶</a></dt>
+<dt id="pymmWave.IWR6843AOP.IWR6843AOP.send_config">
+<code class="sig-name descname"><span class="pre">send_config</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">config</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">list</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_retries</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">1</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">bool</span><a class="headerlink" href="#pymmWave.IWR6843AOP.IWR6843AOP.send_config" title="Permalink to this definition">¶</a></dt>
 <dd><p>Tried to send a TI config, with a simple retry mechanism.
 Configuration files can be created here: <cite>https://dev.ti.com/gallery/view/mmwave/mmWave_Demo_Visualizer/ver/3.5.0/</cite>. Future support may be built for creating configuration files.</p>
 <dl class="field-list simple">
@@ -423,8 +432,8 @@ Configuration files can be created here: <cite>https://dev.ti.com/gallery/view/m
 </dd></dl>
 
 <dl class="py method">
-<dt id="mmWave.IWR6843AOP.IWR6843AOP.start_sensor">
-<em class="property"><span class="pre">async</span> </em><code class="sig-name descname"><span class="pre">start_sensor</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="headerlink" href="#mmWave.IWR6843AOP.IWR6843AOP.start_sensor" title="Permalink to this definition">¶</a></dt>
+<dt id="pymmWave.IWR6843AOP.IWR6843AOP.start_sensor">
+<em class="property"><span class="pre">async</span> </em><code class="sig-name descname"><span class="pre">start_sensor</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="headerlink" href="#pymmWave.IWR6843AOP.IWR6843AOP.start_sensor" title="Permalink to this definition">¶</a></dt>
 <dd><p>Starts the sensor and will place data into a queue.
 The goal of this function is to manage the state of the entire application. Nothing will happen if this function is not run with asyncio.
 This function attempts to read data from the sensor as quickly as it can, then extract positional+doppler data, and place data into an asyncio.Queue.
@@ -438,14 +447,14 @@ Since this relies on the asyncio Queue, limitations may stem from asyncio. These
 </dd></dl>
 
 <dl class="py method">
-<dt id="mmWave.IWR6843AOP.IWR6843AOP.stop_sensor">
-<code class="sig-name descname"><span class="pre">stop_sensor</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mmWave.IWR6843AOP.IWR6843AOP.stop_sensor" title="Permalink to this definition">¶</a></dt>
+<dt id="pymmWave.IWR6843AOP.IWR6843AOP.stop_sensor">
+<code class="sig-name descname"><span class="pre">stop_sensor</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pymmWave.IWR6843AOP.IWR6843AOP.stop_sensor" title="Permalink to this definition">¶</a></dt>
 <dd><p>This function attempts to close all serial ports and update internal state booleans.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="mmWave.IWR6843AOP.IWR6843AOP.type">
-<code class="sig-name descname"><span class="pre">type</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <a class="reference internal" href="#mmWave.sensor.Sensor.SensorType" title="mmWave.sensor.Sensor.SensorType"><span class="pre">mmWave.sensor.Sensor.SensorType</span></a><a class="headerlink" href="#mmWave.IWR6843AOP.IWR6843AOP.type" title="Permalink to this definition">¶</a></dt>
+<dt id="pymmWave.IWR6843AOP.IWR6843AOP.type">
+<code class="sig-name descname"><span class="pre">type</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <a class="reference internal" href="#pymmWave.sensor.Sensor.SensorType" title="pymmWave.sensor.Sensor.SensorType"><span class="pre">pymmWave.sensor.Sensor.SensorType</span></a><a class="headerlink" href="#pymmWave.IWR6843AOP.IWR6843AOP.type" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns enum <code class="xref py py-obj docutils literal notranslate"><span class="pre">Sensor.SensorType</span></code></p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -457,52 +466,52 @@ Since this relies on the asyncio Queue, limitations may stem from asyncio. These
 </dd></dl>
 
 </div>
-<div class="section" id="module-mmWave.sensor">
-<span id="abstract-sensor-class"></span><h1>Abstract Sensor Class<a class="headerlink" href="#module-mmWave.sensor" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-pymmWave.sensor">
+<span id="abstract-sensor-class"></span><h1>Abstract Sensor Class<a class="headerlink" href="#module-pymmWave.sensor" title="Permalink to this headline">¶</a></h1>
 <dl class="py exception">
-<dt id="mmWave.sensor.InvalidSensorException">
-<em class="property"><span class="pre">exception</span> </em><code class="sig-prename descclassname"><span class="pre">mmWave.sensor.</span></code><code class="sig-name descname"><span class="pre">InvalidSensorException</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">message</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">errors</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mmWave.sensor.InvalidSensorException" title="Permalink to this definition">¶</a></dt>
+<dt id="pymmWave.sensor.InvalidSensorException">
+<em class="property"><span class="pre">exception</span> </em><code class="sig-prename descclassname"><span class="pre">pymmWave.sensor.</span></code><code class="sig-name descname"><span class="pre">InvalidSensorException</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">message</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">errors</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymmWave.sensor.InvalidSensorException" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py class">
-<dt id="mmWave.sensor.Sensor">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">mmWave.sensor.</span></code><code class="sig-name descname"><span class="pre">Sensor</span></code><a class="headerlink" href="#mmWave.sensor.Sensor" title="Permalink to this definition">¶</a></dt>
+<dt id="pymmWave.sensor.Sensor">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">pymmWave.sensor.</span></code><code class="sig-name descname"><span class="pre">Sensor</span></code><a class="headerlink" href="#pymmWave.sensor.Sensor" title="Permalink to this definition">¶</a></dt>
 <dd><p>Base sensor class. The goal of this class implementation is such that users can implement classes which can then be used with our library of algorithms easily.</p>
 <dl class="py class">
-<dt id="mmWave.sensor.Sensor.SensorType">
-<em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">SensorType</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mmWave.sensor.Sensor.SensorType" title="Permalink to this definition">¶</a></dt>
+<dt id="pymmWave.sensor.Sensor.SensorType">
+<em class="property"><span class="pre">class</span> </em><code class="sig-name descname"><span class="pre">SensorType</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">value</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymmWave.sensor.Sensor.SensorType" title="Permalink to this definition">¶</a></dt>
 <dd><p>Enum class for sensor types</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="mmWave.sensor.Sensor.get_data">
-<em class="property"><span class="pre">abstract</span> <span class="pre">async</span> </em><code class="sig-name descname"><span class="pre">get_data</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <a class="reference internal" href="#mmWave.data_model.DataModel" title="mmWave.data_model.DataModel"><span class="pre">mmWave.data_model.DataModel</span></a><a class="headerlink" href="#mmWave.sensor.Sensor.get_data" title="Permalink to this definition">¶</a></dt>
+<dt id="pymmWave.sensor.Sensor.get_data">
+<em class="property"><span class="pre">abstract</span> <span class="pre">async</span> </em><code class="sig-name descname"><span class="pre">get_data</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <a class="reference internal" href="#pymmWave.data_model.DataModel" title="pymmWave.data_model.DataModel"><span class="pre">pymmWave.data_model.DataModel</span></a><a class="headerlink" href="#pymmWave.sensor.Sensor.get_data" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return data from sensor.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="mmWave.sensor.Sensor.get_data_nowait">
-<em class="property"><span class="pre">abstract</span> </em><code class="sig-name descname"><span class="pre">get_data_nowait</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#mmWave.data_model.DataModel" title="mmWave.data_model.DataModel"><span class="pre">mmWave.data_model.DataModel</span></a><span class="p"><span class="pre">]</span></span><a class="headerlink" href="#mmWave.sensor.Sensor.get_data_nowait" title="Permalink to this definition">¶</a></dt>
+<dt id="pymmWave.sensor.Sensor.get_data_nowait">
+<em class="property"><span class="pre">abstract</span> </em><code class="sig-name descname"><span class="pre">get_data_nowait</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pymmWave.data_model.DataModel" title="pymmWave.data_model.DataModel"><span class="pre">pymmWave.data_model.DataModel</span></a><span class="p"><span class="pre">]</span></span><a class="headerlink" href="#pymmWave.sensor.Sensor.get_data_nowait" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return data from sensor if available, otherwise None.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
 <dd class="field-odd"><p>Data if there is data available, otherwise returns None.</p>
 </dd>
 <dt class="field-even">Return type</dt>
-<dd class="field-even"><p>Optional[<a class="reference internal" href="#mmWave.data_model.DopplerPointCloud" title="mmWave.data_model.DopplerPointCloud">DopplerPointCloud</a>]</p>
+<dd class="field-even"><p>Optional[<a class="reference internal" href="#pymmWave.data_model.DopplerPointCloud" title="pymmWave.data_model.DopplerPointCloud">DopplerPointCloud</a>]</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
-<dt id="mmWave.sensor.Sensor.get_update_freq">
-<em class="property"><span class="pre">abstract</span> </em><code class="sig-name descname"><span class="pre">get_update_freq</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">float</span><a class="headerlink" href="#mmWave.sensor.Sensor.get_update_freq" title="Permalink to this definition">¶</a></dt>
+<dt id="pymmWave.sensor.Sensor.get_update_freq">
+<em class="property"><span class="pre">abstract</span> </em><code class="sig-name descname"><span class="pre">get_update_freq</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">float</span><a class="headerlink" href="#pymmWave.sensor.Sensor.get_update_freq" title="Permalink to this definition">¶</a></dt>
 <dd><p>Returns the sensor update freq. This is reccommended to be the actual rate of data access.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt id="mmWave.sensor.Sensor.is_alive">
-<em class="property"><span class="pre">abstract</span> </em><code class="sig-name descname"><span class="pre">is_alive</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">bool</span><a class="headerlink" href="#mmWave.sensor.Sensor.is_alive" title="Permalink to this definition">¶</a></dt>
+<dt id="pymmWave.sensor.Sensor.is_alive">
+<em class="property"><span class="pre">abstract</span> </em><code class="sig-name descname"><span class="pre">is_alive</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">bool</span><a class="headerlink" href="#pymmWave.sensor.Sensor.is_alive" title="Permalink to this definition">¶</a></dt>
 <dd><p>Check if sensor is still alive</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -515,8 +524,8 @@ Since this relies on the asyncio Queue, limitations may stem from asyncio. These
 </dd></dl>
 
 <dl class="py method">
-<dt id="mmWave.sensor.Sensor.model">
-<em class="property"><span class="pre">abstract</span> </em><code class="sig-name descname"><span class="pre">model</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">str</span><a class="headerlink" href="#mmWave.sensor.Sensor.model" title="Permalink to this definition">¶</a></dt>
+<dt id="pymmWave.sensor.Sensor.model">
+<em class="property"><span class="pre">abstract</span> </em><code class="sig-name descname"><span class="pre">model</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">str</span><a class="headerlink" href="#pymmWave.sensor.Sensor.model" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the model of a sensor</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -529,8 +538,8 @@ Since this relies on the asyncio Queue, limitations may stem from asyncio. These
 </dd></dl>
 
 <dl class="py method">
-<dt id="mmWave.sensor.Sensor.start_sensor">
-<em class="property"><span class="pre">abstract</span> <span class="pre">async</span> </em><code class="sig-name descname"><span class="pre">start_sensor</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="headerlink" href="#mmWave.sensor.Sensor.start_sensor" title="Permalink to this definition">¶</a></dt>
+<dt id="pymmWave.sensor.Sensor.start_sensor">
+<em class="property"><span class="pre">abstract</span> <span class="pre">async</span> </em><code class="sig-name descname"><span class="pre">start_sensor</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="headerlink" href="#pymmWave.sensor.Sensor.start_sensor" title="Permalink to this definition">¶</a></dt>
 <dd><p>Asynchronous loop that can be run as a corouting with asyncio, or other asynchronous libraries.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -540,8 +549,8 @@ Since this relies on the asyncio Queue, limitations may stem from asyncio. These
 </dd></dl>
 
 <dl class="py method">
-<dt id="mmWave.sensor.Sensor.stop_sensor">
-<em class="property"><span class="pre">abstract</span> </em><code class="sig-name descname"><span class="pre">stop_sensor</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#mmWave.sensor.Sensor.stop_sensor" title="Permalink to this definition">¶</a></dt>
+<dt id="pymmWave.sensor.Sensor.stop_sensor">
+<em class="property"><span class="pre">abstract</span> </em><code class="sig-name descname"><span class="pre">stop_sensor</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#pymmWave.sensor.Sensor.stop_sensor" title="Permalink to this definition">¶</a></dt>
 <dd><p>Stop sensor</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -551,8 +560,8 @@ Since this relies on the asyncio Queue, limitations may stem from asyncio. These
 </dd></dl>
 
 <dl class="py method">
-<dt id="mmWave.sensor.Sensor.type">
-<em class="property"><span class="pre">abstract</span> </em><code class="sig-name descname"><span class="pre">type</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <a class="reference internal" href="#mmWave.sensor.Sensor.SensorType" title="mmWave.sensor.Sensor.SensorType"><span class="pre">mmWave.sensor.Sensor.SensorType</span></a><a class="headerlink" href="#mmWave.sensor.Sensor.type" title="Permalink to this definition">¶</a></dt>
+<dt id="pymmWave.sensor.Sensor.type">
+<em class="property"><span class="pre">abstract</span> </em><code class="sig-name descname"><span class="pre">type</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <a class="reference internal" href="#pymmWave.sensor.Sensor.SensorType" title="pymmWave.sensor.Sensor.SensorType"><span class="pre">pymmWave.sensor.Sensor.SensorType</span></a><a class="headerlink" href="#pymmWave.sensor.Sensor.type" title="Permalink to this definition">¶</a></dt>
 <dd><p>Return the type of a sensor</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -567,31 +576,31 @@ Since this relies on the asyncio Queue, limitations may stem from asyncio. These
 </dd></dl>
 
 <dl class="py class">
-<dt id="mmWave.sensor.SpatialSensor">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">mmWave.sensor.</span></code><code class="sig-name descname"><span class="pre">SpatialSensor</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sens</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#mmWave.sensor.Sensor" title="mmWave.sensor.Sensor"><span class="pre">mmWave.sensor.Sensor</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">location</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">tuple</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pitch_rads</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">tuple</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mmWave.sensor.SpatialSensor" title="Permalink to this definition">¶</a></dt>
+<dt id="pymmWave.sensor.SpatialSensor">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">pymmWave.sensor.</span></code><code class="sig-name descname"><span class="pre">SpatialSensor</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sens</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#pymmWave.sensor.Sensor" title="pymmWave.sensor.Sensor"><span class="pre">pymmWave.sensor.Sensor</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">location</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">tuple</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pitch_rads</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">tuple</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymmWave.sensor.SpatialSensor" title="Permalink to this definition">¶</a></dt>
 <dd><p>Wrapper to provide the notion of a sensor in space</p>
 </dd></dl>
 
 </div>
-<div class="section" id="module-mmWave.data_model">
-<span id="data-model"></span><h1>Data Model<a class="headerlink" href="#module-mmWave.data_model" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-pymmWave.data_model">
+<span id="data-model"></span><h1>Data Model<a class="headerlink" href="#module-pymmWave.data_model" title="Permalink to this headline">¶</a></h1>
 <dl class="py class">
-<dt id="mmWave.data_model.DataModel">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">mmWave.data_model.</span></code><code class="sig-name descname"><span class="pre">DataModel</span></code><a class="headerlink" href="#mmWave.data_model.DataModel" title="Permalink to this definition">¶</a></dt>
+<dt id="pymmWave.data_model.DataModel">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">pymmWave.data_model.</span></code><code class="sig-name descname"><span class="pre">DataModel</span></code><a class="headerlink" href="#pymmWave.data_model.DataModel" title="Permalink to this definition">¶</a></dt>
 <dd><p>Base Data Class</p>
 </dd></dl>
 
 <dl class="py class">
-<dt id="mmWave.data_model.DopplerPointCloud">
-<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">mmWave.data_model.</span></code><code class="sig-name descname"><span class="pre">DopplerPointCloud</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mmWave.data_model.DopplerPointCloud" title="Permalink to this definition">¶</a></dt>
+<dt id="pymmWave.data_model.DopplerPointCloud">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">pymmWave.data_model.</span></code><code class="sig-name descname"><span class="pre">DopplerPointCloud</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">numpy.ndarray</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymmWave.data_model.DopplerPointCloud" title="Permalink to this definition">¶</a></dt>
 <dd><p>Fairly lightweight class for X, Y, Z, and doppler data.</p>
 <dl class="py method">
-<dt id="mmWave.data_model.DopplerPointCloud.append">
-<code class="sig-name descname"><span class="pre">append</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#mmWave.data_model.DopplerPointCloud" title="mmWave.data_model.DopplerPointCloud"><span class="pre">mmWave.data_model.DopplerPointCloud</span></a></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">bool</span><a class="headerlink" href="#mmWave.data_model.DopplerPointCloud.append" title="Permalink to this definition">¶</a></dt>
+<dt id="pymmWave.data_model.DopplerPointCloud.append">
+<code class="sig-name descname"><span class="pre">append</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">other</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#pymmWave.data_model.DopplerPointCloud" title="pymmWave.data_model.DopplerPointCloud"><span class="pre">pymmWave.data_model.DopplerPointCloud</span></a></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">bool</span><a class="headerlink" href="#pymmWave.data_model.DopplerPointCloud.append" title="Permalink to this definition">¶</a></dt>
 <dd><p>Append another DopplerPointCloud object to this one in-place</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><p><strong>other</strong> (<a class="reference internal" href="#mmWave.data_model.DopplerPointCloud" title="mmWave.data_model.DopplerPointCloud"><em>DopplerPointCloud</em></a>) – Another object of the same type</p>
+<dd class="field-odd"><p><strong>other</strong> (<a class="reference internal" href="#pymmWave.data_model.DopplerPointCloud" title="pymmWave.data_model.DopplerPointCloud"><em>DopplerPointCloud</em></a>) – Another object of the same type</p>
 </dd>
 <dt class="field-even">Returns</dt>
 <dd class="field-even"><p>If success, true.</p>
@@ -603,8 +612,8 @@ Since this relies on the asyncio Queue, limitations may stem from asyncio. These
 </dd></dl>
 
 <dl class="py method">
-<dt id="mmWave.data_model.DopplerPointCloud.get">
-<code class="sig-name descname"><span class="pre">get</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">numpy.ndarray</span><a class="headerlink" href="#mmWave.data_model.DopplerPointCloud.get" title="Permalink to this definition">¶</a></dt>
+<dt id="pymmWave.data_model.DopplerPointCloud.get">
+<code class="sig-name descname"><span class="pre">get</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">numpy.ndarray</span><a class="headerlink" href="#pymmWave.data_model.DopplerPointCloud.get" title="Permalink to this definition">¶</a></dt>
 <dd><p>Gets the underlying data container.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns</dt>
@@ -617,8 +626,8 @@ Since this relies on the asyncio Queue, limitations may stem from asyncio. These
 </dd></dl>
 
 <dl class="py method">
-<dt id="mmWave.data_model.DopplerPointCloud.translate_rotate">
-<code class="sig-name descname"><span class="pre">translate_rotate</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">location</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">tuple</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pitch_rads</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">scipy.spatial.transform.rotation.Rotation</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#mmWave.data_model.DopplerPointCloud.translate_rotate" title="Permalink to this definition">¶</a></dt>
+<dt id="pymmWave.data_model.DopplerPointCloud.translate_rotate">
+<code class="sig-name descname"><span class="pre">translate_rotate</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">location</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">tuple</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">pitch_rads</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">scipy.spatial.transform.rotation.Rotation</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymmWave.data_model.DopplerPointCloud.translate_rotate" title="Permalink to this definition">¶</a></dt>
 <dd><p>Translates and rotates the underlying object. This is done in-place, no further verification is done.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -633,11 +642,11 @@ Since this relies on the asyncio Queue, limitations may stem from asyncio. These
 </dd></dl>
 
 </div>
-<div class="section" id="module-mmWave.utils">
-<span id="utilities"></span><h1>Utilities<a class="headerlink" href="#module-mmWave.utils" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-pymmWave.utils">
+<span id="utilities"></span><h1>Utilities<a class="headerlink" href="#module-pymmWave.utils" title="Permalink to this headline">¶</a></h1>
 <dl class="py function">
-<dt id="mmWave.utils.load_cfg_file">
-<code class="sig-prename descclassname"><span class="pre">mmWave.utils.</span></code><code class="sig-name descname"><span class="pre">load_cfg_file</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepath</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">list</span><a class="headerlink" href="#mmWave.utils.load_cfg_file" title="Permalink to this definition">¶</a></dt>
+<dt id="pymmWave.utils.load_cfg_file">
+<code class="sig-prename descclassname"><span class="pre">pymmWave.utils.</span></code><code class="sig-name descname"><span class="pre">load_cfg_file</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">filepath</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">str</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">list</span><a class="headerlink" href="#pymmWave.utils.load_cfg_file" title="Permalink to this definition">¶</a></dt>
 <dd><p>Loads a config file to a list of strings. Wrapper around readlines() with some simple verification.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>

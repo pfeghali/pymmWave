@@ -9,6 +9,16 @@ pymmWave is an asynchronous TI mmWave library to expedite mmWave development.
 
 A motivating example:
 
+First get the serial ports which your sensor is using.
+
+.. code-block:: console
+
+    $ ls /dev/tty.*
+    ... /dev/tty.SLAB_USBtoUART4     /dev/tty.SLAB_USBtoUART
+
+
+Insert the serial ports to the config and data arguments, and thats it!
+
 .. code-block::
    :linenos:
 
@@ -77,23 +87,23 @@ Notably, Jackie Burd, Tiffany Cowan, Peter Feghali, Yogananda Isukapalli, Cher L
 
 IWR6843AOPEVM Implementation
 ============================
-.. automodule:: mmWave.IWR6843AOP
+.. automodule:: pymmWave.IWR6843AOP
     :members:
 
 Abstract Sensor Class
 =====================
-.. automodule:: mmWave.sensor
+.. automodule:: pymmWave.sensor
     :members:
 
 
 Data Model
 ==================
-.. automodule:: mmWave.data_model
+.. automodule:: pymmWave.data_model
     :members:
 
 Utilities
 ==================
-.. automodule:: mmWave.utils
+.. automodule:: pymmWave.utils
     :members:
 
 
