@@ -20,5 +20,6 @@ setup(
    url='https://pymmwave.readthedocs.io/en/latest/#',
    author_email='peterfeghali@ucsb.edu',
    include_package_data=True,
-   python_requires='>3.9'
+   python_requires='>3.9',
+   license_files=('LICENSE')
 )

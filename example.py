@@ -1,9 +1,10 @@
 from pymmWave.sensor import Sensor
 from pymmWave.IWR6843AOP import IWR6843AOP
-from pymmWave.constants import EXAMPLE_CONFIG
 from asyncio import get_event_loop, sleep
+from pymmWave.utils import load_cfg_file
 
-sensor1 = IWR6843AOP("1", verbose=False)
+sensor1 = IWR6843AOP("1", verbose=True)
+file = load_cfg_file("./example_configs/20fpsspeedy.cfg")
 
 config_connected = sensor1.connect_config('/dev/tty.SLAB_USBtoUART4', 115200)
 if not config_connected:
@@ -11,7 +12,7 @@ if not config_connected:
     exit()
 data_connected = sensor1.connect_data('/dev/tty.SLAB_USBtoUART', 921600)
 
-if not sensor1.send_config(EXAMPLE_CONFIG, max_retries=1):
+if not sensor1.send_config(file, max_retries=1):
     print("Sending config failed")
     exit()
 
