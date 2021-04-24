@@ -1,1 +1,1 @@
-python -m pip install mypy pyserial numpy
+python -m pip install mypy pyserial numpy scipy
