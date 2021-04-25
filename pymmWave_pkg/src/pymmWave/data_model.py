@@ -1,4 +1,4 @@
-from abc import ABC
+from abc import ABC, abstractmethod
 import numpy as np
 from scipy.spatial.transform.rotation import Rotation
 
@@ -6,6 +6,12 @@ class DataModel(ABC):
     """
     Base Data Class
     """
+
+    @abstractmethod
+    def get(self):
+        """Get the underlying value
+        """
+        pass
 
 class DopplerPointCloud(DataModel):
     """Fairly lightweight class for X, Y, Z, and doppler data.
@@ -94,3 +100,13 @@ class _speed_constraints(DataModel):
 
     def get_max_z(self) -> tuple[float, float]:
         return self._max_z
+
+class MeanFloatValue(DataModel):
+    """Container class for average return values
+    """
+    def __init__(self, value: float) -> None:
+        super().__init__()
+        self._val = value
+
+    def get(self) -> float:
+        return self._val

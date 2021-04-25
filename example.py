@@ -2,6 +2,7 @@ from pymmWave.sensor import Sensor
 from pymmWave.IWR6843AOP import IWR6843AOP
 from asyncio import get_event_loop, sleep
 from pymmWave.utils import load_cfg_file
+from pymmWave.algos import SimpleMeanDistance
 
 sensor1 = IWR6843AOP("1", verbose=True)
 file = load_cfg_file("./example_configs/20fpsspeedy.cfg")
@@ -20,8 +21,10 @@ sensor1.configure_filtering(.1)
 
 async def print_data(sens: Sensor):
     await sleep(2)
+    mean = SimpleMeanDistance()
     while True:
-        print(await sens.get_data())
+        v = await sens.get_data()
+        print(mean.run(v).get())
 
 event_loop = get_event_loop()
 
