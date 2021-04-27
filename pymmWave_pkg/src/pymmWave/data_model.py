@@ -1,4 +1,5 @@
 from abc import ABC, abstractmethod
+from typing import Any
 import numpy as np
 from scipy.spatial.transform.rotation import Rotation
 
@@ -8,7 +9,7 @@ class DataModel(ABC):
     """
 
     @abstractmethod
-    def get(self):
+    def get(self) -> Any:
         """Get the underlying value
         """
         pass
@@ -67,12 +68,16 @@ class DopplerPointCloud(DataModel):
     def __repr__(self) -> str:
         return self._data.__repr__()
 
-class _imu_data(DataModel):
-    def __init__(self, altitude: float, dxdydz: tuple[float, float, float], yawpitchroll: tuple[float, float, float], heading: float) -> None:
+class ImuData(DataModel):
+    def __init__(self, altitude: float, dxdydz: tuple[float, float, float], rollpitchyaw: tuple[float, float, float], heading: float) -> None:
         self._altitude: float = altitude
         self._dxdydz: tuple[float, float, float] = dxdydz
-        self._yawpitchroll: tuple[float, float, float] = yawpitchroll
+        self._rollpitchyaw: tuple[float, float, float] = rollpitchyaw
         self._heading: float = heading
+        self._rot: Rotation = Rotation.from_euler('zyx', [self._rollpitchyaw])
+
+    def get(self) -> Rotation:
+        return self._rot
 
     def get_altitude(self) -> float:
         return self._altitude
@@ -84,7 +89,7 @@ class _imu_data(DataModel):
         return self._dxdydz
 
     def get_yawpitchroll(self) -> tuple[float, float, float]:
-        return self._yawpitchroll
+        return self._rollpitchyaw
 
 class _speed_constraints(DataModel):
     def __init__(self, max_x: tuple[float, float], max_y: tuple[float, float], max_z: tuple[float, float]) -> None:
