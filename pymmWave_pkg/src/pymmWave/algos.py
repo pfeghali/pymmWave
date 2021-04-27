@@ -160,51 +160,53 @@ class CloudEstimatedIMU(Algorithm):
         # xm = sorted(xm, key=itemgetter(0))
         # ym = sorted(ym, key=itemgetter(0))
         # zm = sorted(zm, key=itemgetter(0))
-        xv = [x[0] for x in xm]
-        yv = [x[0] for x in ym]
-        zv = [x[0] for x in zm]
-        xrad = [x[0]/x[1] for x in xm if x[1] != 0]
-        yrad = [x[0]/x[1] for x in ym if x[1] != 0]
-        zrad = [x[0]/x[1] for x in zm if x[1] != 0]
+        if len(xm) > 0 and len(ym) > 0 and len(zm) > 0:
+            xv = [x[0] for x in xm]
+            yv = [x[0] for x in ym]
+            zv = [x[0] for x in zm]
+            xrad = [x[0]/x[1] for x in xm if x[1] != 0]
+            yrad = [x[0]/x[1] for x in ym if x[1] != 0]
+            zrad = [x[0]/x[1] for x in zm if x[1] != 0]
 
 
-        x_mean: float = np.mean(xv) # type: ignore
-        y_mean: float = np.mean(yv) # type: ignore
-        z_mean: float = np.mean(zv) # type: ignore
-        x_mean_rad: float = np.mean(xrad) # type: ignore
-        y_mean_rad: float = np.mean(yrad) # type: ignore
-        z_mean_rad: float = np.mean(zrad) # type: ignore
+            x_mean: float = np.mean(xv) # type: ignore
+            y_mean: float = np.mean(yv) # type: ignore
+            z_mean: float = np.mean(zv) # type: ignore
+            x_mean_rad: float = np.mean(xrad) # type: ignore
+            y_mean_rad: float = np.mean(yrad) # type: ignore
+            z_mean_rad: float = np.mean(zrad) # type: ignore
 
-        # x_idx :int = np.searchsorted(xv, x_mean)
-        # y_idx :int = np.searchsorted(yv, y_mean)
-        # z_idx :int = np.searchsorted(zv, z_mean)
+            # x_idx :int = np.searchsorted(xv, x_mean)
+            # y_idx :int = np.searchsorted(yv, y_mean)
+            # z_idx :int = np.searchsorted(zv, z_mean)
 
-        # x_lt = 0
-        # y_lt = 0
-        # z_lt = 0
+            # x_lt = 0
+            # y_lt = 0
+            # z_lt = 0
 
-        # if len(xm[:x_idx]) > 0:
-        #     x_lt = np.mean(xrad[:x_idx]) # average radial velocity of left side
-        # if len(ym[:y_idx]) > 0:
-        #     x_lt = np.mean(yrad[:y_idx])
-        # if len(zm[:z_idx]) > 0:
-        #     x_lt = np.mean(zrad[:z_idx])
+            # if len(xm[:x_idx]) > 0:
+            #     x_lt = np.mean(xrad[:x_idx]) # average radial velocity of left side
+            # if len(ym[:y_idx]) > 0:
+            #     x_lt = np.mean(yrad[:y_idx])
+            # if len(zm[:z_idx]) > 0:
+            #     x_lt = np.mean(zrad[:z_idx])
 
-        # x_rt = 0
-        # y_rt = 0
-        # z_rt = 0
+            # x_rt = 0
+            # y_rt = 0
+            # z_rt = 0
 
-        # if len(xm[x_idx:]) > 0:
-        #     x_rt = np.mean(xrad[x_idx:])
-        # if len(ym[y_idx:]) > 0:
-        #     y_rt = np.mean(yrad[y_idx:])
-        # if len(zm[z_idx:]) > 0:
-        #     z_rt = np.mean(zrad[z_idx:])
+            # if len(xm[x_idx:]) > 0:
+            #     x_rt = np.mean(xrad[x_idx:])
+            # if len(ym[y_idx:]) > 0:
+            #     y_rt = np.mean(yrad[y_idx:])
+            # if len(zm[z_idx:]) > 0:
+            #     z_rt = np.mean(zrad[z_idx:])
 
-        # wubble-u is = Velocity/radius. For each mean we should 
+            # wubble-u is = Velocity/radius. For each mean we should 
 
-        return ImuVelocityData((x_mean, y_mean, z_mean), (x_mean_rad,y_mean_rad,z_mean_rad))
-
+            return ImuVelocityData((x_mean, y_mean, z_mean), (x_mean_rad,y_mean_rad,z_mean_rad))
+        else:
+            return None
 
     def reset(self) -> None:
         """Reset the state of an algorithm.
