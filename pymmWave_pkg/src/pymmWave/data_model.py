@@ -68,15 +68,45 @@ class DopplerPointCloud(DataModel):
     def __repr__(self) -> str:
         return self._data.__repr__()
 
-class ImuData(DataModel):
-    def __init__(self, altitude: float, dxdydz: tuple[float, float, float], rollpitchyaw: tuple[float, float, float], heading: float) -> None:
-        self._altitude: float = altitude
+class ImuVelocityData(DataModel):
+    """Class to represent a velocity data point from the IMU.
+
+    Args:
+        DataModel ([type]): [description]
+    """
+    def __init__(self, dxdydz: tuple[float, float, float], drolldpitchdyaw: tuple[float, float, float]) -> None:
         self._dxdydz: tuple[float, float, float] = dxdydz
-        self._rollpitchyaw: tuple[float, float, float] = rollpitchyaw
-        self._heading: float = heading
-        self._rot: Rotation = Rotation.from_euler('zyx', [self._rollpitchyaw])
+        self._drolldpitchdyaw: tuple[float, float, float] = drolldpitchdyaw
+        self._rot: Rotation = Rotation.from_euler('zyx', [self._drolldpitchdyaw]) #type: ignore
 
     def get(self) -> Rotation:
+        """This is a get representing the change in roll/pitch/yaw. This will need to be time adjusted to be useful.
+
+        Returns:
+            Rotation: [description]
+        """
+        return self._rot
+
+    def get_dxdydz(self) -> tuple[float, float, float]:
+        return self._dxdydz
+
+    def get_dyawdpitchdroll(self) -> tuple[float, float, float]:
+        return self._drolldpitchdyaw
+
+class ImuData(DataModel):
+    def __init__(self, altitude: float, dxdydz: tuple[float, float, float], drolldpitchdyaw: tuple[float, float, float], heading: float) -> None:
+        self._altitude: float = altitude
+        self._dxdydz: tuple[float, float, float] = dxdydz
+        self._drolldpitchdyaw: tuple[float, float, float] = drolldpitchdyaw
+        self._heading: float = heading
+        self._rot: Rotation = Rotation.from_euler('zyx', [self._drolldpitchdyaw])  #type: ignore
+
+    def get(self) -> Rotation:
+        """This is a get representing the change in roll/pitch/yaw. This will need to be time adjusted to be useful.
+
+        Returns:
+            Rotation: [description]
+        """
         return self._rot
 
     def get_altitude(self) -> float:
@@ -88,8 +118,10 @@ class ImuData(DataModel):
     def get_dxdydz(self) -> tuple[float, float, float]:
         return self._dxdydz
 
-    def get_yawpitchroll(self) -> tuple[float, float, float]:
-        return self._rollpitchyaw
+    def get_dyawdpitchdroll(self) -> tuple[float, float, float]:
+        return self._drolldpitchdyaw
+
+
 
 class _speed_constraints(DataModel):
     def __init__(self, max_x: tuple[float, float], max_y: tuple[float, float], max_z: tuple[float, float]) -> None:
@@ -115,3 +147,24 @@ class MeanFloatValue(DataModel):
 
     def get(self) -> float:
         return self._val
+
+class Pose(DataModel):
+    def __init__(self) -> None:
+        super().__init__()
+        self._x = 0
+        self._y = 0
+        self._z = 0
+        self._yaw = 0
+        self._pitch = 0
+        self._roll = 0
+
+    def move(self, imu_vel: ImuVelocityData, time_passed: float):
+        self._x += imu_vel.get_dxdydz()[0] * time_passed
+        self._y += imu_vel.get_dxdydz()[1] * time_passed
+        self._z += imu_vel.get_dxdydz()[2] * time_passed
+        self._yaw += imu_vel.get_dyawdpitchdroll()[0] * time_passed
+        self._pitch += imu_vel.get_dyawdpitchdroll()[1] * time_passed
+        self._roll += imu_vel.get_dyawdpitchdroll()[2] * time_passed
+
+    def get(self) -> tuple[float, float, float, float, float, float]:
+        return (self._x, self._y, self._z, self._yaw, self._pitch, self._roll)
