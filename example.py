@@ -9,11 +9,11 @@ import numpy as np
 sensor1 = IWR6843AOP("1", verbose=True)
 file = load_cfg_file("./example_configs/20fpsspeedy.cfg")
 
-config_connected = sensor1.connect_config('/dev/tty.SLAB_USBtoUART', 115200)
+config_connected = sensor1.connect_config('/dev/tty.SLAB_USBtoUART4', 115200)
 if not config_connected:
     print("Config connection failed.")
     exit()
-data_connected = sensor1.connect_data('/dev/tty.SLAB_USBtoUART4', 921600)
+data_connected = sensor1.connect_data('/dev/tty.SLAB_USBtoUART', 921600)
 
 if not sensor1.send_config(file, max_retries=1):
     print("Sending config failed")
@@ -25,7 +25,7 @@ async def print_data(sens: Sensor):
     await sleep(2)
     # mean = SimpleMeanDistance()
     est_imu = CloudEstimatedIMU()
-    est_imu.modify_minimum_datapoints(7)
+    # est_imu.modify_minimum_datapoints(10)
     pos_est = EstimatedRelativePosition()
 
     while True:

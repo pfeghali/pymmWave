@@ -69,10 +69,15 @@ class DopplerPointCloud(DataModel):
         return self._data.__repr__()
 
 class ImuVelocityData(DataModel):
+    """Class to represent a velocity data point from the IMU.
+
+    Args:
+        DataModel ([type]): [description]
+    """
     def __init__(self, dxdydz: tuple[float, float, float], drolldpitchdyaw: tuple[float, float, float]) -> None:
         self._dxdydz: tuple[float, float, float] = dxdydz
         self._drolldpitchdyaw: tuple[float, float, float] = drolldpitchdyaw
-        self._rot: Rotation = Rotation.from_euler('zyx', [self._drolldpitchdyaw])
+        self._rot: Rotation = Rotation.from_euler('zyx', [self._drolldpitchdyaw]) #type: ignore
 
     def get(self) -> Rotation:
         """This is a get representing the change in roll/pitch/yaw. This will need to be time adjusted to be useful.
@@ -94,7 +99,7 @@ class ImuData(DataModel):
         self._dxdydz: tuple[float, float, float] = dxdydz
         self._drolldpitchdyaw: tuple[float, float, float] = drolldpitchdyaw
         self._heading: float = heading
-        self._rot: Rotation = Rotation.from_euler('zyx', [self._drolldpitchdyaw])
+        self._rot: Rotation = Rotation.from_euler('zyx', [self._drolldpitchdyaw])  #type: ignore
 
     def get(self) -> Rotation:
         """This is a get representing the change in roll/pitch/yaw. This will need to be time adjusted to be useful.
@@ -154,9 +159,11 @@ class Pose(DataModel):
         self._roll = 0
 
     def move(self, imu_vel: ImuVelocityData, time_passed: float):
-        self._x += imu_vel.get_dxdydz()[0] * time_passed
-        self._y += imu_vel.get_dxdydz()[1] * time_passed
-        self._z += imu_vel.get_dxdydz()[2] * time_passed
+        rot_vec: np.ndarray = (Rotation.from_euler('zyx', [self._roll, self._pitch, self._yaw]) ).apply(imu_vel.get_dxdydz()) * time_passed
+
+        self._x += rot_vec[0]
+        self._y += rot_vec[1]
+        self._z += rot_vec[2]
         self._yaw += imu_vel.get_dyawdpitchdroll()[0] * time_passed
         self._pitch += imu_vel.get_dyawdpitchdroll()[1] * time_passed
         self._roll += imu_vel.get_dyawdpitchdroll()[2] * time_passed

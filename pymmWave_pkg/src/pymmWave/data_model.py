@@ -159,9 +159,11 @@ class Pose(DataModel):
         self._roll = 0
 
     def move(self, imu_vel: ImuVelocityData, time_passed: float):
-        self._x += imu_vel.get_dxdydz()[0] * time_passed
-        self._y += imu_vel.get_dxdydz()[1] * time_passed
-        self._z += imu_vel.get_dxdydz()[2] * time_passed
+        rot_vec: np.ndarray = (Rotation.from_euler('zyx', [self._roll, self._pitch, self._yaw]) ).apply(imu_vel.get_dxdydz()) * time_passed
+
+        self._x += rot_vec[0]
+        self._y += rot_vec[1]
+        self._z += rot_vec[2]
         self._yaw += imu_vel.get_dyawdpitchdroll()[0] * time_passed
         self._pitch += imu_vel.get_dyawdpitchdroll()[1] * time_passed
         self._roll += imu_vel.get_dyawdpitchdroll()[2] * time_passed

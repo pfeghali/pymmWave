@@ -13,6 +13,9 @@ from math import atan, cos, sin
 class Algorithm(ABC):
     """Base abstract class for all algorithms.
     """
+    def __init__(self) -> None:
+        super().__init__()
+        self._last_called: float = t()
 
     @abstractmethod
     def reset(self) -> None:
@@ -20,6 +23,18 @@ class Algorithm(ABC):
         """
         pass
 
+    def get_time_delta(self) -> float:
+        """Get delta between two of these function calls
+
+        Returns:
+            float: Time in seconds representing the time between calls
+        """
+        t_called = t()
+        t_delta: float = t_called - self._last_called # units are seconds
+        self._last_called = t_called
+
+        return t_delta
+        
 
 class SimpleMeanDistance(Algorithm):
     def __init__(self) -> None:
@@ -50,7 +65,7 @@ class IMUAdjustedPersistedData(Algorithm):
         super().__init__()
         assert steps_to_persist >= 0, "Cannot persist less than 0 states."
         self._steps: int = steps_to_persist
-        self._last_called: float = t()
+
         self._pts: deque[DopplerPointCloud] = deque()
 
     def reset(self) -> None:
@@ -86,9 +101,7 @@ class IMUAdjustedPersistedData(Algorithm):
         Returns:
             DopplerPointCloud: [description]
         """
-        t_called = t()
-        t_delta: float = t_called-self._last_called # units are seconds
-        self._last_called = t_called
+        t_delta: float = self.get_time_delta()
         mv = imu_in.get_dxdydz()
 
         # Simple state estimation based on imu
@@ -114,7 +127,7 @@ class CloudEstimatedIMU(Algorithm):
     """
     def __init__(self) -> None:
         super().__init__()
-        self._last_called: float = t()
+
         self._minimum_pts = 5
 
     def modify_minimum_datapoints(self, val: int) -> None:
@@ -127,11 +140,10 @@ class CloudEstimatedIMU(Algorithm):
 
 
     def run(self, data: DopplerPointCloud) -> Optional[ImuVelocityData]:
-        """Accepts a doppler point cloud, and generates estimated linear and angular velocity.
+        """Accepts a doppler point cloud, and generates estimated linear and angular velocity. 
 
         Args:
             data (DopplerPointCloud): Cloud of data, must be of size more than the minimum to be used.
-
         Returns:
             Optional[ImuVelocityData]: If there are not enough data points, None. Otherwise returns an estimate of the IMU.
         """
@@ -145,7 +157,7 @@ class CloudEstimatedIMU(Algorithm):
         raw: np.ndarray = data.get()
         for each in raw:
             doppler = each[3]
-            if each[0] != 0:
+            if each[2] != 0:
                 z_angle_flat_plane = atan(each[1]/each[2])
             else:
                 z_angle_flat_plane = 0
@@ -221,23 +233,26 @@ class EstimatedRelativePosition(Algorithm):
     """
     def __init__(self) -> None:
         super().__init__()
-        self._last_called: float = t()
         self._current_pose: Pose = Pose()
 
-    def run(self, imu_vel: ImuVelocityData, t_factor: float=1) -> Pose:
-        """Given IMU velocity and an arbitrary optional factor, estimate current pose.
-
+    def run(self, imu_vel: ImuVelocityData, t_factor: float=1, is_moving: bool=True) -> Pose:
+        """Given IMU velocity and an arbitrary optional factor, estimate current pose. This also accepts more user metadata, specifically if the sensor is actually moving.
+        This may not be known, but if it is, then should be set correctly. Due to the uncertainty of the RADAR sensor, this additional data will help ensure that
+        in complex scenes the algorithm does not misunderstand its movement.
+        It remains important to call this function even if is_moving is false, to update the frequency of the function call.
         Args:
             imu_vel (ImuVelocityData): IMU Velocity object
             t_factor (float, optional): Optional factor to hand-tune this estimate. Simply a multiplier of time. Defaults to 1.
+            is_moving (bool, optional): A boolean which can be set to false if the user knows that the sensor is not moving. Defaults to True.
 
         Returns:
             Pose: An estimate of the current pose
         """
-        t_called = t()
-        t_delta: float = t_called-self._last_called # units are seconds
-        self._last_called = t_called
-        self._current_pose.move(imu_vel, t_delta*t_factor)
+
+        t_delta: float = self.get_time_delta()
+
+        if is_moving:
+            self._current_pose.move(imu_vel, t_delta*t_factor)
 
         return self._current_pose
 
