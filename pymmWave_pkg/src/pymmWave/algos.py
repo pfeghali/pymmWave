@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Any, Optional
 import numpy as np
-from .data_model import DopplerPointCloud, ImuVelocityData, MeanFloatValue, Pose
+from .data_model import DopplerPointCloud, ImuVelocityData, Pose
 from time import time as t
 from collections import deque
 from scipy.spatial.transform.rotation import Rotation
@@ -25,7 +25,7 @@ class Algorithm(ABC):
         """
         pass
 
-    def get_time_delta(self) -> float:
+    def _get_time_delta(self) -> float:
         """Get delta between two of these function calls
 
         Returns:
@@ -57,16 +57,26 @@ class Algorithm(ABC):
 
 
 class SimpleMeanDistance(Algorithm):
+    """An implementation of a simple point cloud algorithm. Computes the average L2 norm of the input data.
+    """
     def __init__(self) -> None:
         super().__init__()
 
-    def run(self, input: DopplerPointCloud) -> MeanFloatValue:
+    def run(self, input: DopplerPointCloud) -> float:
+        """Takes in a point cloud and returns the mean. Stateless.
+
+        Args:
+            input (DopplerPointCloud): Input point cloud, ignores doppler data.
+
+        Returns:
+            MeanFloatValue: A float representing the mean from this algorithm.
+        """
         inp = input.get()
         mean_val: float = 0.0
         if inp.shape[0] > 0:
             mean_val = np.mean(np.sqrt(np.square(inp[:,:-1]).sum(axis=1))) #type: ignore
 
-        return MeanFloatValue(mean_val)
+        return mean_val
 
     def reset(self) -> None:
         """Reset the state of an algorithm.
@@ -121,7 +131,7 @@ class IMUAdjustedPersistedData(Algorithm):
         Returns:
             DopplerPointCloud: [description]
         """
-        t_delta: float = self.get_time_delta()
+        t_delta: float = self._get_time_delta()
         mv = imu_in.get_dxdydz()
 
         # Simple state estimation based on imu
@@ -269,7 +279,7 @@ class EstimatedRelativePosition(Algorithm):
             Pose: An estimate of the current pose
         """
 
-        t_delta: float = self.get_time_delta()
+        t_delta: float = self._get_time_delta()
 
         if is_moving:
             self._current_pose.move(imu_vel, t_delta*t_factor)

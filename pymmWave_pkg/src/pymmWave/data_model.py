@@ -138,16 +138,6 @@ class _speed_constraints(DataModel):
     def get_max_z(self) -> tuple[float, float]:
         return self._max_z
 
-class MeanFloatValue(DataModel):
-    """Container class for average return values
-    """
-    def __init__(self, value: float) -> None:
-        super().__init__()
-        self._val = value
-
-    def get(self) -> float:
-        return self._val
-
 class Pose(DataModel):
     def __init__(self) -> None:
         super().__init__()

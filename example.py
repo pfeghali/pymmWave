@@ -14,6 +14,9 @@ if not config_connected:
     print("Config connection failed.")
     exit()
 data_connected = sensor1.connect_data('/dev/tty.SLAB_USBtoUART', 921600)
+if not data_connected:
+    print("Data connection failed.")
+    exit()
 
 if not sensor1.send_config(file, max_retries=1):
     print("Sending config failed")
@@ -23,19 +26,16 @@ sensor1.configure_filtering(.1)
 
 async def print_data(sens: Sensor):
     await sleep(2)
-    # mean = SimpleMeanDistance()
+
     est_imu = CloudEstimatedIMU()
-    # est_imu.modify_minimum_datapoints(10)
     pos_est = EstimatedRelativePosition()
 
     while True:
-        v = await sens.get_data()
-        # print(mean.run(v).get(), v.get())
-        z = est_imu.run(v)
-        if z is not None:
-            # print(z.get_dyawdpitchdroll(), "\t", z.get_dxdydz())
-            p = pos_est.run(z)
-            print(p.get())
+        dopplercloud_out = await sens.get_data()
+        imu_estimate = est_imu.run(dopplercloud_out)
+        if imu_estimate is not None:
+            p = pos_est.run(imu_estimate)
+            print("Estimated pose\t", p.get())
 
 event_loop = get_event_loop()
 

@@ -90,6 +90,7 @@
 <li><a class="reference internal" href="#contributors">Contributors</a></li>
 <li><a class="reference internal" href="#module-pymmWave.IWR6843AOP">IWR6843AOPEVM Implementation</a></li>
 <li><a class="reference internal" href="#module-pymmWave.sensor">Abstract Sensor Class</a></li>
+<li><a class="reference internal" href="#module-pymmWave.algos">Algorithms</a></li>
 <li><a class="reference internal" href="#module-pymmWave.data_model">Data Model</a></li>
 <li><a class="reference internal" href="#module-pymmWave.utils">Utilities</a></li>
 <li><a class="reference internal" href="#indices-and-tables">Indices and tables</a></li>
@@ -172,6 +173,7 @@
 </pre></div>
 </div>
 <p>Insert the serial ports to the config and data arguments, and thats it!</p>
+<p>The connection may timeout on connect_config or connect_data. The function also may timeout on a read or write after supposedly connecting to the device. If this occurs, verify your serial port configuration, as they may need to be swapped. On Windows, this can be viewed on device manager. This currently may fail on WSL due to their serial support, but this may change.</p>
 <div class="highlight-default notranslate"><table class="highlighttable"><tr><td class="linenos"><div class="linenodiv"><pre><span class="normal"> 1</span>
 <span class="normal"> 2</span>
 <span class="normal"> 3</span>
@@ -200,29 +202,47 @@
 <span class="normal">26</span>
 <span class="normal">27</span>
 <span class="normal">28</span>
-<span class="normal">29</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span> <span class="kn">from</span> <span class="nn">pymmWave.sensor</span> <span class="kn">import</span> <span class="n">Sensor</span>
+<span class="normal">29</span>
+<span class="normal">30</span>
+<span class="normal">31</span>
+<span class="normal">32</span>
+<span class="normal">33</span>
+<span class="normal">34</span>
+<span class="normal">35</span>
+<span class="normal">36</span>
+<span class="normal">37</span>
+<span class="normal">38</span></pre></div></td><td class="code"><div class="highlight"><pre><span></span> <span class="kn">from</span> <span class="nn">pymmWave.utils</span> <span class="kn">import</span> <span class="n">load_cfg_file</span>
+ <span class="kn">from</span> <span class="nn">pymmWave.sensor</span> <span class="kn">import</span> <span class="n">Sensor</span>
  <span class="kn">from</span> <span class="nn">pymmWave.IWR6843AOP</span> <span class="kn">import</span> <span class="n">IWR6843AOP</span>
- <span class="kn">from</span> <span class="nn">pymmWave.constants</span> <span class="kn">import</span> <span class="n">EXAMPLE_CONFIG</span>
  <span class="kn">from</span> <span class="nn">asyncio</span> <span class="kn">import</span> <span class="n">get_event_loop</span><span class="p">,</span> <span class="n">sleep</span>
 
  <span class="n">sensor1</span> <span class="o">=</span> <span class="n">IWR6843AOP</span><span class="p">(</span><span class="s2">&quot;1&quot;</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+ <span class="n">file</span> <span class="o">=</span> <span class="n">load_cfg_file</span><span class="p">(</span><span class="s2">&quot;./example_configs/20fpsspeedy.cfg&quot;</span><span class="p">)</span>
 
+ <span class="c1"># Your CONFIG serial port name</span>
  <span class="n">config_connected</span> <span class="o">=</span> <span class="n">sensor1</span><span class="o">.</span><span class="n">connect_config</span><span class="p">(</span><span class="s1">&#39;/dev/tty.SLAB_USBtoUART4&#39;</span><span class="p">,</span> <span class="mi">115200</span><span class="p">)</span>
  <span class="k">if</span> <span class="ow">not</span> <span class="n">config_connected</span><span class="p">:</span>
      <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Config connection failed.&quot;</span><span class="p">)</span>
      <span class="n">exit</span><span class="p">()</span>
- <span class="n">data_connected</span> <span class="o">=</span> <span class="n">sensor1</span><span class="o">.</span><span class="n">connect_data</span><span class="p">(</span><span class="s1">&#39;/dev/tty.SLAB_USBtoUART&#39;</span><span class="p">,</span> <span class="mi">921600</span><span class="p">)</span>
 
- <span class="k">if</span> <span class="ow">not</span> <span class="n">sensor1</span><span class="o">.</span><span class="n">send_config</span><span class="p">(</span><span class="n">EXAMPLE_CONFIG</span><span class="p">,</span> <span class="n">max_retries</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
-     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Sending config failed&quot;</span><span class="p">)</span>
+ <span class="c1"># Your DATA serial port name</span>
+ <span class="n">data_connected</span> <span class="o">=</span> <span class="n">sensor1</span><span class="o">.</span><span class="n">connect_data</span><span class="p">(</span><span class="s1">&#39;/dev/tty.SLAB_USBtoUART&#39;</span><span class="p">,</span> <span class="mi">921600</span><span class="p">)</span>
+ <span class="k">if</span> <span class="ow">not</span> <span class="n">data_connected</span><span class="p">:</span>
+     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Data connection failed.&quot;</span><span class="p">)</span>
      <span class="n">exit</span><span class="p">()</span>
 
- <span class="n">sensor1</span><span class="o">.</span><span class="n">configure_filtering</span><span class="p">(</span><span class="o">.</span><span class="mi">1</span><span class="p">)</span>
+ <span class="k">if</span> <span class="ow">not</span> <span class="n">sensor1</span><span class="o">.</span><span class="n">send_config</span><span class="p">(</span><span class="n">file</span><span class="p">,</span> <span class="n">max_retries</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+     <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Sending configuration failed&quot;</span><span class="p">)</span>
+     <span class="n">exit</span><span class="p">()</span>
 
+ <span class="c1"># Sets up doppler filtering to remove static noise</span>
+ <span class="n">sensor1</span><span class="o">.</span><span class="n">configure_filtering</span><span class="p">(</span><span class="o">.</span><span class="mi">05</span><span class="p">)</span>
+
+ <span class="c1"># Basic class to print data from the sensor</span>
  <span class="k">async</span> <span class="k">def</span> <span class="nf">print_data</span><span class="p">(</span><span class="n">sens</span><span class="p">:</span> <span class="n">Sensor</span><span class="p">):</span>
      <span class="k">await</span> <span class="n">sleep</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
      <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
-         <span class="nb">print</span><span class="p">(</span><span class="k">await</span> <span class="n">sens</span><span class="o">.</span><span class="n">get_data</span><span class="p">())</span>
+         <span class="nb">print</span><span class="p">(</span><span class="k">await</span> <span class="n">sens</span><span class="o">.</span><span class="n">get_data</span><span class="p">())</span> <span class="c1"># get_data() -&gt; DopplerPointCloud.</span>
 
  <span class="n">event_loop</span> <span class="o">=</span> <span class="n">get_event_loop</span><span class="p">()</span>
 
@@ -231,10 +251,10 @@
  <span class="n">event_loop</span><span class="o">.</span><span class="n">run_forever</span><span class="p">()</span>
 </pre></div>
 </td></tr></table></div>
-<p>This simple working example demonstrates how with simple asynchronous integration, realtime applications can integrate with mmWave sensors easily.</p>
+<p>This simple working example demonstrates how with simple asynchronous integration, realtime applications can integrate with TI mmWave sensors easily.</p>
 <p>This library was designed to work with the commercial off-the-shelf (COTS) TI IWR6843AOPEVM. While TI does provide a web interface to this product, there were no straightforward Python implementations available.</p>
-<p>The goal of this library is such that if you purchase this EVM, within minutes of unboxing, it should be hackable in Python.</p>
-<p>It should be noted that this package requires python &gt;3.9. This is solely due to type hinting. It should be simple to clone the github, and modify the package to support <cite>typing</cite> classes. We expect this can be accomplished with Python &gt;3.7.</p>
+<p>The goal of this library is such that if you purchase this EVM, within minutes of unboxing, it should be hackable in Python. This library is designed to scale with your use case. In future versions, it will support various algorithms reliant on the abstract implementations presented.</p>
+<p>It should be noted that this package requires python &gt;3.9. This is solely due to type hinting. It should be simple to clone the github, and modify the package to support <cite>typing</cite> classes. We expect this can be accomplished with Python &gt;3.7, though there are no plans to modify the library to support this use-case.</p>
 </div>
 <div class="section" id="install">
 <h1>Install<a class="headerlink" href="#install" title="Permalink to this headline">¶</a></h1>
@@ -246,9 +266,10 @@
 </div>
 <div class="section" id="roadmap">
 <h1>Roadmap<a class="headerlink" href="#roadmap" title="Permalink to this headline">¶</a></h1>
-<p>Currently, this is a simple library providing low-overhead integration with COTS sensors.</p>
+<p>Currently, this is a simple library providing low-overhead integration with COTS TI mmWave sensors.</p>
 <p>The goal is to provide a set of useful RADAR optimized algorithms to expedite research and development. These applications will rely on the abstract Sensor implementations listed below, such that they can be used by developers writing custom RADAR sensor implementations.</p>
-<p>We currently do not modify the firmware of the TI RADAR sensors and have no intention to provide support for this. While this tool can be easily modified for custom firmware, that is not the intention.</p>
+<p>We currently do not modify the firmware of the TI RADAR sensors and have no intention to provide support for this. While this tool can be easily modified for custom firmware, that is not the intention of this tool.</p>
+<p>We are aware that the COTS firmware can return more data than simply point cloud data, and we intend to support this use case in the future.</p>
 </div>
 <div class="section" id="contributors">
 <h1>Contributors<a class="headerlink" href="#contributors" title="Permalink to this headline">¶</a></h1>
@@ -582,12 +603,221 @@ Since this relies on the asyncio Queue, limitations may stem from asyncio. These
 </dd></dl>
 
 </div>
+<div class="section" id="module-pymmWave.algos">
+<span id="algorithms"></span><h1>Algorithms<a class="headerlink" href="#module-pymmWave.algos" title="Permalink to this headline">¶</a></h1>
+<dl class="py class">
+<dt id="pymmWave.algos.Algorithm">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">pymmWave.algos.</span></code><code class="sig-name descname"><span class="pre">Algorithm</span></code><a class="headerlink" href="#pymmWave.algos.Algorithm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Base abstract class for all algorithms.</p>
+<dl class="py method">
+<dt id="pymmWave.algos.Algorithm.error">
+<code class="sig-name descname"><span class="pre">error</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="headerlink" href="#pymmWave.algos.Algorithm.error" title="Permalink to this definition">¶</a></dt>
+<dd><p>Report an error to the logger.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pymmWave.algos.Algorithm.log">
+<code class="sig-name descname"><span class="pre">log</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Any</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">Any</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="headerlink" href="#pymmWave.algos.Algorithm.log" title="Permalink to this definition">¶</a></dt>
+<dd><p>Log something to the logger.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pymmWave.algos.Algorithm.reset">
+<em class="property"><span class="pre">abstract</span> </em><code class="sig-name descname"><span class="pre">reset</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="headerlink" href="#pymmWave.algos.Algorithm.reset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reset the state of an algorithm.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pymmWave.algos.Algorithm.set_logger">
+<code class="sig-name descname"><span class="pre">set_logger</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_logger</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">pymmWave.logging.Logger</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymmWave.algos.Algorithm.set_logger" title="Permalink to this definition">¶</a></dt>
+<dd><p>Replace the defauly stdout logger with another.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>new_logger</strong> (<em>Logger</em>) – The logger to use. Must implement Logger base class.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="pymmWave.algos.CloudEstimatedIMU">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">pymmWave.algos.</span></code><code class="sig-name descname"><span class="pre">CloudEstimatedIMU</span></code><a class="headerlink" href="#pymmWave.algos.CloudEstimatedIMU" title="Permalink to this definition">¶</a></dt>
+<dd><p>The goal of this class is to provide an averaged IMU output from an input point cloud data.
+It is highly reccomended to set the minium number of required points to be relatively high.
+It is wholly reasonable to state that if there are less datapoints, then it is likely that the device is not moving.
+This estimates IMU state based on an average of the input points, if there is enough data.</p>
+<dl class="py method">
+<dt id="pymmWave.algos.CloudEstimatedIMU.modify_minimum_datapoints">
+<code class="sig-name descname"><span class="pre">modify_minimum_datapoints</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">val</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="headerlink" href="#pymmWave.algos.CloudEstimatedIMU.modify_minimum_datapoints" title="Permalink to this definition">¶</a></dt>
+<dd><p>Modifies the number of required datapoints to generate data.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>val</strong> (<em>int</em>) – Any integer, negative indicates all values should be accepted.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pymmWave.algos.CloudEstimatedIMU.reset">
+<code class="sig-name descname"><span class="pre">reset</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="headerlink" href="#pymmWave.algos.CloudEstimatedIMU.reset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reset the state of an algorithm.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pymmWave.algos.CloudEstimatedIMU.run">
+<code class="sig-name descname"><span class="pre">run</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#pymmWave.data_model.DopplerPointCloud" title="pymmWave.data_model.DopplerPointCloud"><span class="pre">pymmWave.data_model.DopplerPointCloud</span></a></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">Optional</span><span class="p"><span class="pre">[</span></span><a class="reference internal" href="#pymmWave.data_model.ImuVelocityData" title="pymmWave.data_model.ImuVelocityData"><span class="pre">pymmWave.data_model.ImuVelocityData</span></a><span class="p"><span class="pre">]</span></span><a class="headerlink" href="#pymmWave.algos.CloudEstimatedIMU.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Accepts a doppler point cloud, and generates estimated linear and angular velocity.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>data</strong> (<a class="reference internal" href="#pymmWave.data_model.DopplerPointCloud" title="pymmWave.data_model.DopplerPointCloud"><em>DopplerPointCloud</em></a>) – Cloud of data, must be of size more than the minimum to be used.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>If there are not enough data points, None. Otherwise returns an estimate of the IMU.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>Optional[<a class="reference internal" href="#pymmWave.data_model.ImuVelocityData" title="pymmWave.data_model.ImuVelocityData">ImuVelocityData</a>]</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="pymmWave.algos.EstimatedRelativePosition">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">pymmWave.algos.</span></code><code class="sig-name descname"><span class="pre">EstimatedRelativePosition</span></code><a class="headerlink" href="#pymmWave.algos.EstimatedRelativePosition" title="Permalink to this definition">¶</a></dt>
+<dd><p>Simple computed estimate of pose with provided IMU velocity.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>Algorithm</strong> (<em>[</em><em>type</em><em>]</em>) – [description]</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="pymmWave.algos.EstimatedRelativePosition.reset">
+<code class="sig-name descname"><span class="pre">reset</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="headerlink" href="#pymmWave.algos.EstimatedRelativePosition.reset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reset the state of an algorithm.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pymmWave.algos.EstimatedRelativePosition.run">
+<code class="sig-name descname"><span class="pre">run</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">imu_vel</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#pymmWave.data_model.ImuVelocityData" title="pymmWave.data_model.ImuVelocityData"><span class="pre">pymmWave.data_model.ImuVelocityData</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">t_factor</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_moving</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">bool</span></span> <span class="o"><span class="pre">=</span></span> <span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span> &#x2192; <a class="reference internal" href="#pymmWave.data_model.Pose" title="pymmWave.data_model.Pose"><span class="pre">pymmWave.data_model.Pose</span></a><a class="headerlink" href="#pymmWave.algos.EstimatedRelativePosition.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given IMU velocity and an arbitrary optional factor, estimate current pose. This also accepts more user metadata, specifically if the sensor is actually moving.
+This may not be known, but if it is, then should be set correctly. Due to the uncertainty of the RADAR sensor, this additional data will help ensure that
+in complex scenes the algorithm does not misunderstand its movement.
+It remains important to call this function even if is_moving is false, to update the frequency of the function call.
+:param imu_vel: IMU Velocity object
+:type imu_vel: ImuVelocityData
+:param t_factor: Optional factor to hand-tune this estimate. Simply a multiplier of time. Defaults to 1.
+:type t_factor: float, optional
+:param is_moving: A boolean which can be set to false if the user knows that the sensor is not moving. Defaults to True.
+:type is_moving: bool, optional</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>An estimate of the current pose</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p><a class="reference internal" href="#pymmWave.data_model.Pose" title="pymmWave.data_model.Pose">Pose</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="pymmWave.algos.IMUAdjustedPersistedData">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">pymmWave.algos.</span></code><code class="sig-name descname"><span class="pre">IMUAdjustedPersistedData</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">steps_to_persist</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymmWave.algos.IMUAdjustedPersistedData" title="Permalink to this definition">¶</a></dt>
+<dd><p>The goal of this class is to adjust data points based on some IMU input, and persist data points through time to retain more data.
+This class will keep track of when data is fed into the algorithm, and will attempt to persist state even when some data is unavailable or poor.
+0 in construction will not allow any persistence</p>
+<dl class="py method">
+<dt id="pymmWave.algos.IMUAdjustedPersistedData.change_persisted_steps">
+<code class="sig-name descname"><span class="pre">change_persisted_steps</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">new_steps</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">int</span></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">bool</span><a class="headerlink" href="#pymmWave.algos.IMUAdjustedPersistedData.change_persisted_steps" title="Permalink to this definition">¶</a></dt>
+<dd><p>Will attempt to change the number of steps to persist. Will return True if successful.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>new_steps</strong> (<em>int</em>) – Should be greater than 0.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Boolean representing success</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>bool</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pymmWave.algos.IMUAdjustedPersistedData.reset">
+<code class="sig-name descname"><span class="pre">reset</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="headerlink" href="#pymmWave.algos.IMUAdjustedPersistedData.reset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reset the state of this algorithm, reset the state of memory, and reset the time it was last called.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pymmWave.algos.IMUAdjustedPersistedData.run">
+<code class="sig-name descname"><span class="pre">run</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_cloud</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#pymmWave.data_model.DopplerPointCloud" title="pymmWave.data_model.DopplerPointCloud"><span class="pre">pymmWave.data_model.DopplerPointCloud</span></a></span></em>, <em class="sig-param"><span class="n"><span class="pre">imu_in</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#pymmWave.data_model.ImuVelocityData" title="pymmWave.data_model.ImuVelocityData"><span class="pre">pymmWave.data_model.ImuVelocityData</span></a></span></em><span class="sig-paren">)</span> &#x2192; <a class="reference internal" href="#pymmWave.data_model.DopplerPointCloud" title="pymmWave.data_model.DopplerPointCloud"><span class="pre">pymmWave.data_model.DopplerPointCloud</span></a><a class="headerlink" href="#pymmWave.algos.IMUAdjustedPersistedData.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given the current Doppler point cloud with IMU data, this function will return a time adjusted point cloud.
+This point cloud will include previously entered point_clouds, which will only be as accurate as the data provided.
+Accuracy can be improved by modifying the allowable persistable steps.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_cloud</strong> (<a class="reference internal" href="#pymmWave.data_model.DopplerPointCloud" title="pymmWave.data_model.DopplerPointCloud"><em>DopplerPointCloud</em></a>) – [description]</p></li>
+<li><p><strong>imu_in</strong> (<a class="reference internal" href="#pymmWave.data_model.ImuData" title="pymmWave.data_model.ImuData"><em>ImuData</em></a>) – [description]</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>[description]</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p><a class="reference internal" href="#pymmWave.data_model.DopplerPointCloud" title="pymmWave.data_model.DopplerPointCloud">DopplerPointCloud</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="pymmWave.algos.SimpleMeanDistance">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">pymmWave.algos.</span></code><code class="sig-name descname"><span class="pre">SimpleMeanDistance</span></code><a class="headerlink" href="#pymmWave.algos.SimpleMeanDistance" title="Permalink to this definition">¶</a></dt>
+<dd><p>An implementation of a simple point cloud algorithm. Computes the average L2 norm of the input data.</p>
+<dl class="py method">
+<dt id="pymmWave.algos.SimpleMeanDistance.reset">
+<code class="sig-name descname"><span class="pre">reset</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">None</span><a class="headerlink" href="#pymmWave.algos.SimpleMeanDistance.reset" title="Permalink to this definition">¶</a></dt>
+<dd><p>Reset the state of an algorithm.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt id="pymmWave.algos.SimpleMeanDistance.run">
+<code class="sig-name descname"><span class="pre">run</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><a class="reference internal" href="#pymmWave.data_model.DopplerPointCloud" title="pymmWave.data_model.DopplerPointCloud"><span class="pre">pymmWave.data_model.DopplerPointCloud</span></a></span></em><span class="sig-paren">)</span> &#x2192; <span class="pre">float</span><a class="headerlink" href="#pymmWave.algos.SimpleMeanDistance.run" title="Permalink to this definition">¶</a></dt>
+<dd><p>Takes in a point cloud and returns the mean. Stateless.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>input</strong> (<a class="reference internal" href="#pymmWave.data_model.DopplerPointCloud" title="pymmWave.data_model.DopplerPointCloud"><em>DopplerPointCloud</em></a>) – Input point cloud, ignores doppler data.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A float representing the mean from this algorithm.</p>
+</dd>
+<dt class="field-odd">Return type</dt>
+<dd class="field-odd"><p>MeanFloatValue</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+</div>
 <div class="section" id="module-pymmWave.data_model">
 <span id="data-model"></span><h1>Data Model<a class="headerlink" href="#module-pymmWave.data_model" title="Permalink to this headline">¶</a></h1>
 <dl class="py class">
 <dt id="pymmWave.data_model.DataModel">
 <em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">pymmWave.data_model.</span></code><code class="sig-name descname"><span class="pre">DataModel</span></code><a class="headerlink" href="#pymmWave.data_model.DataModel" title="Permalink to this definition">¶</a></dt>
 <dd><p>Base Data Class</p>
+<dl class="py method">
+<dt id="pymmWave.data_model.DataModel.get">
+<em class="property"><span class="pre">abstract</span> </em><code class="sig-name descname"><span class="pre">get</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">Any</span><a class="headerlink" href="#pymmWave.data_model.DataModel.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the underlying value</p>
+</dd></dl>
+
 </dd></dl>
 
 <dl class="py class">
@@ -637,6 +867,61 @@ Since this relies on the asyncio Queue, limitations may stem from asyncio. These
 </ul>
 </dd>
 </dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="pymmWave.data_model.ImuData">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">pymmWave.data_model.</span></code><code class="sig-name descname"><span class="pre">ImuData</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">altitude</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dxdydz</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">tuple</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">drolldpitchdyaw</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">tuple</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">heading</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">float</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymmWave.data_model.ImuData" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt id="pymmWave.data_model.ImuData.get">
+<code class="sig-name descname"><span class="pre">get</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">scipy.spatial.transform.rotation.Rotation</span><a class="headerlink" href="#pymmWave.data_model.ImuData.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is a get representing the change in roll/pitch/yaw. This will need to be time adjusted to be useful.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>[description]</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>Rotation</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="pymmWave.data_model.ImuVelocityData">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">pymmWave.data_model.</span></code><code class="sig-name descname"><span class="pre">ImuVelocityData</span></code><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dxdydz</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">tuple</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">drolldpitchdyaw</span></span><span class="p"><span class="pre">:</span></span> <span class="n"><span class="pre">tuple</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#pymmWave.data_model.ImuVelocityData" title="Permalink to this definition">¶</a></dt>
+<dd><p>Class to represent a velocity data point from the IMU.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>DataModel</strong> (<em>[</em><em>type</em><em>]</em>) – [description]</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt id="pymmWave.data_model.ImuVelocityData.get">
+<code class="sig-name descname"><span class="pre">get</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">scipy.spatial.transform.rotation.Rotation</span><a class="headerlink" href="#pymmWave.data_model.ImuVelocityData.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is a get representing the change in roll/pitch/yaw. This will need to be time adjusted to be useful.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>[description]</p>
+</dd>
+<dt class="field-even">Return type</dt>
+<dd class="field-even"><p>Rotation</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt id="pymmWave.data_model.Pose">
+<em class="property"><span class="pre">class</span> </em><code class="sig-prename descclassname"><span class="pre">pymmWave.data_model.</span></code><code class="sig-name descname"><span class="pre">Pose</span></code><a class="headerlink" href="#pymmWave.data_model.Pose" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="py method">
+<dt id="pymmWave.data_model.Pose.get">
+<code class="sig-name descname"><span class="pre">get</span></code><span class="sig-paren">(</span><span class="sig-paren">)</span> &#x2192; <span class="pre">tuple</span><a class="headerlink" href="#pymmWave.data_model.Pose.get" title="Permalink to this definition">¶</a></dt>
+<dd><p>Get the underlying value</p>
 </dd></dl>
 
 </dd></dl>
