@@ -1,7 +1,7 @@
 from abc import ABC, abstractmethod
 from typing import Any, Optional
 import numpy as np
-from .data_model import DopplerPointCloud, ImuVelocityData, Pose
+from .data_model import DopplerPointCloud, ImuVelocityData, Pose, SpeedConstraint
 from time import time as t
 from collections import deque
 from scipy.spatial.transform.rotation import Rotation
@@ -285,6 +285,37 @@ class EstimatedRelativePosition(Algorithm):
             self._current_pose.move(imu_vel, t_delta*t_factor)
 
         return self._current_pose
+
+    def reset(self) -> None:
+        """Reset the state of an algorithm.
+        """
+        pass
+
+
+class CollisionDetection(Algorithm):
+    """[summary]
+    """
+    def __init__(self, pos_x_constraint: float, neg_x_constraint: float, pos_y_constraint: float, neg_y_constraint: float, pos_z_constraint: float, neg_z_constraint: float) -> None:
+        super().__init__()
+
+        self._pos_x = pos_x_constraint
+        self._neg_x = neg_x_constraint
+        self._pos_y = pos_y_constraint
+        self._neg_y = neg_y_constraint
+        self._pos_z = pos_z_constraint
+        self._neg_z = neg_z_constraint
+
+    def run(self, data: DopplerPointCloud) -> SpeedConstraint:
+        """[summary]
+
+        Args:
+            data (DopplerPointCloud): Sensor output point cloud data
+
+        Returns:
+            SpeedConstraint: Speed constraints with values on each axis between 0-1
+        """
+        pass
+
 
     def reset(self) -> None:
         """Reset the state of an algorithm.

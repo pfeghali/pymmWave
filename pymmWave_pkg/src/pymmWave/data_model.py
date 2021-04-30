@@ -123,20 +123,56 @@ class ImuData(DataModel):
 
 
 
-class _speed_constraints(DataModel):
+class SpeedConstraint(DataModel):
+    """Represents a set of speed constraints for directions.
+    Speed constraints must remain between 0-1 for each value.
+    """
     def __init__(self, max_x: tuple[float, float], max_y: tuple[float, float], max_z: tuple[float, float]) -> None:
+        self._check_constraint(max_x)
+        self._check_constraint(max_y)
+        self._check_constraint(max_z)
+        
         self._max_x = max_x
         self._max_y = max_y
         self._max_z = max_z
 
+    def _check_constraint(self, check: tuple[float, float]):
+        assert check[0] >= 0
+        assert check[1] >= 0
+        assert check[0] <= 1
+        assert check[1] <= 1
+
     def get_max_x(self) -> tuple[float, float]:
+        """Gets x constraints
+
+        Returns:
+            tuple[float, float]: Tuple with 0-1 values for +x and -x
+        """
         return self._max_x
 
     def get_max_y(self) -> tuple[float, float]:
+        """Gets y constraints
+
+        Returns:
+            tuple[float, float]: Tuple with 0-1 values for +y and -y
+        """
         return self._max_y
 
     def get_max_z(self) -> tuple[float, float]:
+        """Gets z constraints
+
+        Returns:
+            tuple[float, float]: Tuple with 0-1 values for +z and -z
+        """
         return self._max_z
+
+    def get(self) -> tuple[tuple[float, float], tuple[float, float], tuple[float, float]]:
+        """Gets the x, y, and z constraints as a tuple of tuples.
+
+        Returns:
+            tuple[tuple[float, float], tuple[float, float], tuple[float, float]]: X, Y, and Z tuples, with values between 0-1
+        """
+        return (self._max_x, self._max_y, self._max_z)
 
 class Pose(DataModel):
     """A generic representation of pose. The goal is to support basic operations on representations of current physical state.
