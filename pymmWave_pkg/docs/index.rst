@@ -116,6 +116,10 @@ Algorithms
 .. automodule:: pymmWave.algos
     :members:
 
+Logging
+==================
+.. automodule:: pymmWave.logging
+    :members:
 
 Data Model
 ==================
