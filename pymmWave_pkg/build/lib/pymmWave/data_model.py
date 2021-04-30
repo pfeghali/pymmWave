@@ -90,7 +90,7 @@ class ImuVelocityData(DataModel):
     def get_dxdydz(self) -> tuple[float, float, float]:
         return self._dxdydz
 
-    def get_dyawdpitchdroll(self) -> tuple[float, float, float]:
+    def get_drolldpitchdyaw(self) -> tuple[float, float, float]:
         return self._drolldpitchdyaw
 
 class ImuData(DataModel):
@@ -118,7 +118,7 @@ class ImuData(DataModel):
     def get_dxdydz(self) -> tuple[float, float, float]:
         return self._dxdydz
 
-    def get_dyawdpitchdroll(self) -> tuple[float, float, float]:
+    def get_drolldpitchdyaw(self) -> tuple[float, float, float]:
         return self._drolldpitchdyaw
 
 
@@ -139,6 +139,8 @@ class _speed_constraints(DataModel):
         return self._max_z
 
 class Pose(DataModel):
+    """A generic representation of pose. The goal is to support basic operations on representations of current physical state.
+    """
     def __init__(self) -> None:
         super().__init__()
         self._x = 0
@@ -149,14 +151,25 @@ class Pose(DataModel):
         self._roll = 0
 
     def move(self, imu_vel: ImuVelocityData, time_passed: float):
+        """Based on some IMU velocity information and the amount of time which has passed, modify the current pose.
+
+        Args:
+            imu_vel (ImuVelocityData): Input IMU data.
+            time_passed (float): Time in seconds.
+        """
         rot_vec: np.ndarray = (Rotation.from_euler('zyx', [self._roll, self._pitch, self._yaw]) ).apply(imu_vel.get_dxdydz()) * time_passed
 
         self._x += rot_vec[0]
         self._y += rot_vec[1]
         self._z += rot_vec[2]
-        self._yaw += imu_vel.get_dyawdpitchdroll()[0] * time_passed
-        self._pitch += imu_vel.get_dyawdpitchdroll()[1] * time_passed
-        self._roll += imu_vel.get_dyawdpitchdroll()[2] * time_passed
+        self._yaw += imu_vel.get_drolldpitchdyaw()[0] * time_passed
+        self._pitch += imu_vel.get_drolldpitchdyaw()[1] * time_passed
+        self._roll += imu_vel.get_drolldpitchdyaw()[2] * time_passed
 
     def get(self) -> tuple[float, float, float, float, float, float]:
-        return (self._x, self._y, self._z, self._yaw, self._pitch, self._roll)
+        """Returns a tuple representing x, y, z position, and roll, pitch, yaw.
+
+        Returns:
+            tuple[float, float, float, float, float, float]: (x, y, z, roll, pitch, yaw)
+        """
+        return (self._x, self._y, self._z, self._roll, self._pitch, self._yaw)

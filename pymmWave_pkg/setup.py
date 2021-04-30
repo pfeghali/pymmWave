@@ -12,7 +12,7 @@ with open(path.join(path.abspath(path.dirname(__file__)), 'README.md'), encoding
 
 setup(
    name="pymmWave",
-   version='1.1.0',
+   version='1.1.1',
    py_modules=['pymmWave'],
    description="A TI mmWave RADAR EVM integration library.",
    long_description=long_description,
