@@ -71,6 +71,9 @@ The goal of this library is such that if you purchase this EVM, within minutes o
 
 It should be noted that this package requires python >3.9. This is solely due to type hinting. It should be simple to clone the github, and modify the package to support `typing` classes. We expect this can be accomplished with Python >3.7, though there are no plans to modify the library to support this use-case.
 
+Version 1.1.0 brings a number of simple algorithms. This now supports generic algorithms, and presents some simple, non-optimized algorithms. These algorithms allow for pose estimation, mocking an IMU, and a simple point cloud mean.
+
+
 Install
 ========
 
@@ -108,6 +111,15 @@ Abstract Sensor Class
 .. automodule:: pymmWave.sensor
     :members:
 
+Algorithms
+==================
+.. automodule:: pymmWave.algos
+    :members:
+
+Logging
+==================
+.. automodule:: pymmWave.logging
+    :members:
 
 Data Model
 ==================

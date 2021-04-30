@@ -10,6 +10,8 @@
         "pymm",
         "rotvec",
         "serialutil",
-        "xyzd"
+        "xrad",
+        "xyzd",
+        "zrad"
     ]
 }
