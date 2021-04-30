@@ -1,11 +1,12 @@
 from abc import ABC, abstractmethod
-from typing import Optional
+from typing import Any, Optional
 import numpy as np
 from .data_model import DopplerPointCloud, ImuVelocityData, MeanFloatValue, Pose
 from time import time as t
 from collections import deque
 from scipy.spatial.transform.rotation import Rotation
 from math import atan, cos, sin
+from .logging import Logger, StdOutLogger
 # from operator import itemgetter
 
 # Abstract class file to contain an abstract class for all algorithms, and to contain some set of useful algos.
@@ -16,6 +17,7 @@ class Algorithm(ABC):
     def __init__(self) -> None:
         super().__init__()
         self._last_called: float = t()
+        self._log: Logger = StdOutLogger()
 
     @abstractmethod
     def reset(self) -> None:
@@ -34,7 +36,25 @@ class Algorithm(ABC):
         self._last_called = t_called
 
         return t_delta
-        
+
+    def set_logger(self, new_logger: Logger):
+        """Replace the defauly stdout logger with another.
+
+        Args:
+            new_logger (Logger): The logger to use. Must implement Logger base class.
+        """
+        self._logger = new_logger
+
+    def log(self, *args: Any, **kwargs: Any) -> None:
+        """Log something to the logger.
+        """
+        self._log.log(*args, **kwargs)
+
+    def error(self, *args: Any, **kwargs: Any) -> None:
+        """Report an error to the logger.
+        """
+        self._log.log(*args, **kwargs)
+
 
 class SimpleMeanDistance(Algorithm):
     def __init__(self) -> None:
@@ -148,7 +168,7 @@ class CloudEstimatedIMU(Algorithm):
             Optional[ImuVelocityData]: If there are not enough data points, None. Otherwise returns an estimate of the IMU.
         """
         if data.get().shape[0] < self._minimum_pts:
-            # print(self.__class__.__name__, "WARNING: Not enough data.")
+            # self._logger.log(self.__class__.__name__, "WARNING: Not enough data.")
             return None
         xm: list[tuple[float, float]] = []
         ym: list[tuple[float, float]] = []
