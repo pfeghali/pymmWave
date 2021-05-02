@@ -1,6 +1,6 @@
 Metadata-Version: 2.1
 Name: pymmWave
-Version: 1.1.1
+Version: 1.1.2
 Summary: A TI mmWave RADAR EVM integration library.
 Home-page: https://pymmwave.readthedocs.io/en/latest/#
 Author-email: peterfeghali@ucsb.edu

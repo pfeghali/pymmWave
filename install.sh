@@ -1,1 +1,1 @@
-python -m pip install --force-reinstall ./pymmWave_pkg/dist/pymmWave-1.1.1-py3-none-any.whl
+python -m pip install --force-reinstall ./pymmWave_pkg/dist/pymmWave-1.1.2-py3-none-any.whl
