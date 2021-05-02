@@ -309,18 +309,18 @@ class IWR6843AOP(Sensor):
         
         if not self._config_sent:
             raise Exception("Config never sent to device")
-
+        a: Optional[bytes] = b''
         while True:
             # Allows for context switching
             await sleep(ASYNC_SLEEP)
             try:
                 chunks: list[bytes] = []
-                a: Optional[bytes] = self._ser_data.read_all()  # type: ignore
+                a += self._ser_data.read_all()  # type: ignore
                 if a is None:
                     raise SerialException()
                 b = MAGIC_NUMBER
                 index = [x for x in range(len(a)) if a[x:x+len(b)] == b]
-                # print(a)
+                # print(len(a))
                 if len(index) > 0:
 
                     dt = self._frame()
@@ -436,7 +436,10 @@ class IWR6843AOP(Sensor):
                                     self._active_data.get_nowait()
                                 # print(self.name, obj.get())
                                 self._active_data.put_nowait(obj)
-                            
+                    a = b''
+                else:
+                    pass
+                    # print("No data.")
             except (IndexError, ValueError) as _:
                 pass
         return None
