@@ -1,14 +1,37 @@
 from abc import ABC, abstractmethod
-from typing import Optional
+from typing import Optional, Any
 from .data_model import DataModel
 from scipy.spatial.transform.rotation import Rotation
 from enum import Enum
-
+from .logging import Logger, StdOutLogger
 
 class Sensor(ABC):
     """
     Base sensor class. The goal of this class implementation is such that users can implement classes which can then be used with our library of algorithms easily.
     """
+    def __init__(self) -> None:
+        super().__init__()
+        self._log: Logger = StdOutLogger()
+
+    def set_logger(self, new_logger: Logger):
+        """Replace the default stdout logger with another.
+
+        Args:
+            new_logger (Logger): The logger to use. Must implement Logger base class.
+        """
+        self._logger = new_logger
+
+    def log(self, *args: Any, **kwargs: Any) -> None:
+        """Log something to the logger.
+        """
+        self._log.log(*args, **kwargs)
+
+    def error(self, *args: Any, **kwargs: Any) -> None:
+        """Report an error to the logger.
+        """
+        self._log.log(*args, **kwargs)
+
+
 
     class SensorType(Enum):
         """Enum class for sensor types
