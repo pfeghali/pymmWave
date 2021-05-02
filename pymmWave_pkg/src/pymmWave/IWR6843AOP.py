@@ -24,6 +24,7 @@ class IWR6843AOP(Sensor):
         Args:
             verbose (bool, optional): Print out extra initialization information, can be useful. Defaults to False.
         """
+        super().__init__()
         self._is_alive: bool = False
         self._ser_config: Optional[Serial]  = None
         self._ser_data: Optional[Serial] = None
@@ -31,6 +32,10 @@ class IWR6843AOP(Sensor):
         self._doppler_filtering = 0
         self._config_sent = False
         self.name = name
+        self._config_port_name: Optional[str] = None
+        self._data_port_name: Optional[str] = None
+        self._config_baud: Optional[int] = None
+        self._data_baud: Optional[int] = None
 
         # Why a queue? This is forward looking. asyncio defaults to single threaded behavior and therefore this should
         #   be thread safe by default. The upside of a queue is if this changes to a multi-process system on some executor,
@@ -131,6 +136,8 @@ class IWR6843AOP(Sensor):
             return False
 
         self._update_alive()
+        self._config_port_name = com_port
+        self._config_baud = baud_rate
 
         return True
 
@@ -165,6 +172,8 @@ class IWR6843AOP(Sensor):
             return False
 
         self._update_alive()
+        self._data_port_name = com_port
+        self._data_baud = baud_rate
 
         return True
 
@@ -205,7 +214,7 @@ class IWR6843AOP(Sensor):
         """
         return "IWR6843AOP"
 
-    def send_config(self, config: list[str], max_retries: int=1) -> bool:
+    def send_config(self, config: list[str], max_retries: int=1, autoretry_cfg_data: bool=True) -> bool:
         """Tried to send a TI config, with a simple retry mechanism.
         Configuration files can be created here: `https://dev.ti.com/gallery/view/mmwave/mmWave_Demo_Visualizer/ver/3.5.0/`. Future support may be built for creating configuration files.
 
@@ -219,6 +228,7 @@ class IWR6843AOP(Sensor):
         Raises:
             SerialException: If device is disconnected before completion, SerialExceptions may be raised.
         """
+        valid_replies = set(["Done", "Ignored: Sensor is already stopped"])
         if not self._is_alive:
             self._config_sent = False
             return False
@@ -234,20 +244,52 @@ class IWR6843AOP(Sensor):
                 else:
                     ln = line.replace('\r','')
                     self._ser_config.write(ln.encode())  # type: ignore
-                    # print(ln)
-                    # time.sleep(.2)
-                    ret = self._ser_config.readline()  # type: ignore
-                    if self._verbose: print(ret)  # type: ignore
-                    ret = self._ser_config.readline().decode('utf-8')[:-1]  # type: ignore
-                    if (ret != "Done") and (ret != "Ignored: Sensor is already stopped"):
+
+                    try:
+                        ret1 = self._ser_config.readline()  # type: ignore
+                        ret1 = ret1.decode('utf-8')[:-1].strip()   # type: ignore
+                    except UnicodeDecodeError:
+                        ret1 = "error"
+
+                    try:
+                        ret = self._ser_config.readline()   # type: ignore
+                        ret = ret.decode('utf-8')[:-1].strip()  # type: ignore
+                    except UnicodeDecodeError:
+                        ret = "error"
+
+                    # We look at both replies just in case of an error in ordering of results. Rare, but can happen.
+                    if not ((ret1 in valid_replies) or (ret in valid_replies)):
                         failed = True
-                    if self._verbose: print(ret)  # type: ignore
+                        self.log("invalid replies:", ret1, ret)
+                        self.error("Sending configuration failed!")
+                        break
+                    # if self._verbose: self.log(ret_str)  # type: ignore
 
             if not failed:
                 self._config_sent = True
                 return True
         
-        return False
+        # There are various reasons for failure. One of the more common is due to swapping of cfg/data.
+        if not autoretry_cfg_data:
+            return False
+
+        # we need to close config/data connections, and attempt to reconnect.
+        # Swaps ports and their baud rates. Trying to reopen connections just does not work.
+        self.log("Attempting to auto-resolve configuration error.")
+        self._ser_config.reset_output_buffer()   # type: ignore
+        self._ser_data.reset_output_buffer()   # type: ignore
+        self._ser_config.reset_input_buffer()   # type: ignore
+        self._ser_data.reset_input_buffer()   # type: ignore
+        self._ser_config.baudrate = self._data_baud   # type: ignore
+        self._ser_data.baudrate = self._config_baud  # type: ignore
+        tmp = self._ser_data   # type: ignore
+        self._ser_data = self._ser_config   # type: ignore
+        self._ser_config = tmp
+
+
+        self.log(f"Swapped opened config ({self._config_port_name}) and data ports ({self._data_port_name}).")
+        self.log("Retrying configuration.")
+        return self.send_config(config, max_retries, autoretry_cfg_data=False)
 
     async def start_sensor(self) -> None:
         """Starts the sensor and will place data into a queue.
@@ -267,19 +309,20 @@ class IWR6843AOP(Sensor):
         
         if not self._config_sent:
             raise Exception("Config never sent to device")
-
+        a: Optional[bytes] = b''
         while True:
             # Allows for context switching
             await sleep(ASYNC_SLEEP)
             try:
                 chunks: list[bytes] = []
-                a: Optional[bytes] = self._ser_data.read_all()  # type: ignore
+                a += self._ser_data.read_all()  # type: ignore
                 if a is None:
                     raise SerialException()
                 b = MAGIC_NUMBER
                 index = [x for x in range(len(a)) if a[x:x+len(b)] == b]
-                # print(a)
+                # print(len(a))
                 if len(index) > 0:
+
                     dt = self._frame()
                     # Header
                     byteVecIdx = index[0]+8 # magic word (4 unit16)
@@ -393,7 +436,10 @@ class IWR6843AOP(Sensor):
                                     self._active_data.get_nowait()
                                 # print(self.name, obj.get())
                                 self._active_data.put_nowait(obj)
-                            
+                    a = b''
+                else:
+                    pass
+                    # print("No data.")
             except (IndexError, ValueError) as _:
                 pass
         return None
@@ -425,7 +471,6 @@ class IWR6843AOP(Sensor):
             return self._active_data.get_nowait()
         
         return None
-
 
     def stop_sensor(self):
         """This function attempts to close all serial ports and update internal state booleans.

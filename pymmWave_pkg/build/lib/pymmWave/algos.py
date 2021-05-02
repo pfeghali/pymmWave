@@ -38,7 +38,7 @@ class Algorithm(ABC):
         return t_delta
 
     def set_logger(self, new_logger: Logger):
-        """Replace the defauly stdout logger with another.
+        """Replace the default stdout logger with another.
 
         Args:
             new_logger (Logger): The logger to use. Must implement Logger base class.
