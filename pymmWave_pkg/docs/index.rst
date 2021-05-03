@@ -20,6 +20,7 @@ First get the serial ports which your sensor is using.
 Insert the serial ports to the config and data arguments, and thats it!
 
 The connection may timeout on connect_config or connect_data. The function also may timeout on a read or write after supposedly connecting to the device. If this occurs, verify your serial port configuration, as they may need to be swapped. On Windows, this can be viewed on device manager. This currently may fail on WSL due to their serial support, but this may change.
+As of v1.1.2, the application will attempt to renegotiate COM connections if they have been misconfigured. It will not raise an error, but will log this.
 
 .. code-block::
    :linenos:

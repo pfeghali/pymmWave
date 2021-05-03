@@ -217,10 +217,12 @@ class IWR6843AOP(Sensor):
     def send_config(self, config: list[str], max_retries: int=1, autoretry_cfg_data: bool=True) -> bool:
         """Tried to send a TI config, with a simple retry mechanism.
         Configuration files can be created here: `https://dev.ti.com/gallery/view/mmwave/mmWave_Demo_Visualizer/ver/3.5.0/`. Future support may be built for creating configuration files.
-
+        This can be setup to autoretry on connection failure. With single device setups, this may allow for automated search of devices by users.
+        
         Args:
             config (list[str]): List of strings making up the config
             max_retries (int, optional): Number of times to retry on failure. Defaults to 1.
+            autoretry_cfg_data (bool, optional): If on failure to try to swap cfg/data COM ports. Defaults to True.
 
         Returns:
             bool: If sending was successful
