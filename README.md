@@ -12,10 +12,6 @@ Future support around this may be built.
 
 This is designed to function with the COTS TI IWR6843AOP system. The abstract classes are designed to be used in a more generic manner, and have been already used to implement a 2D LiDAR solution.
 
-Please read the license file and note that this software is still in an ALPHA state. 
+Please read the license file. 
 
 Please report any bugs as Github issues.
-
-TODO:
- - Pose estimation based on trajectory.
- - Perhaps continuous estimated state management.
